@@ -1,0 +1,42 @@
+
+{
+  "version": 20250520,
+  "lastUpdated": "2025-05-20T10:00:00Z",
+  "description": "Official 2026 Selective Entry Practice - Initial Release",
+  "questions": [
+    {
+      "id": "math-geom-sample-01",
+      "category": "Mathematics",
+      "topic": "2 Geometry and networks",
+      "text": "In the figure below, $ABCD$ is a square with side length 10. Point $E$ is on $BC$ such that $BE = 3$. $F$ is a point on $CD$ such that $\\angle EAF = 45^\\circ$. Find the length of $FD$.",
+      "options": [
+        "$\\frac{70}{13}$",
+        "$\\frac{70}{17}$",
+        "5",
+        "$\\frac{50}{13}$",
+        "4"
+      ],
+      "correctAnswerIndex": 0,
+      "explanation": "Let us set up a coordinate system with $A$ at $(0,10)$, $B$ at $(10,10)$, $C$ at $(10,0)$, and $D$ at $(0,0)$. Wait, standard orientation: $A(0,10)$ is top-left? Let's use standard Cartesian: $A(0,0)$, $B(10,0)$, $C(10,10)$, $D(0,10)$.\\n\\nGiven:\\n$ABCD$ is a square side 10.\\n$E$ is on $BC$. $B$ is $(10,0)$, $C$ is $(10,10)$. $BE=3$. Since $E$ is on $BC$, $E$ is $(10,3)$.\\n$F$ is on $CD$. $C$ is $(10,10)$, $D$ is $(0,10)$. $F$ has coordinates $(x, 10)$. Let $DF = x$. Then $F$ is $(x, 10)$. Wait, $D$ is $(0,10)$, so distance from $D$ to $F$ along $y=10$ is $x$. So $F$ is $(x, 10)$.\\n\\nWe require $\\angle EAF = 45^\\circ$.\\nLine $AE$ slope $m_1 = \\frac{3-0}{10-0} = 0.3$.\\nLine $AF$ slope $m_2 = \\frac{10-0}{x-0} = \\frac{10}{x}$.\\n\\nThe angle $\\theta$ between two lines with slopes $m_1, m_2$ is given by $\\tan \\theta = \\left| \\frac{m_2 - m_1}{1 + m_1 m_2} \\right|$.\\nHere $\\theta = 45^\\circ$, so $\\tan 45^\\circ = 1$.\\n$1 = \\frac{\\frac{10}{x} - 0.3}{1 + 0.3(\\frac{10}{x})}$ (assuming $F$ is to the left of the line where angle is larger, slopes are positive in this quadrant setup).\\n$1 = \\frac{\\frac{10 - 0.3x}{x}}{\\frac{x + 3}{x}} = \\frac{10 - 0.3x}{x + 3}$.\\n$x + 3 = 10 - 0.3x$\\n$1.3x = 7$\\n$x = \\frac{7}{1.3} = \\frac{70}{13}$.\\n\\nThus $FD = \\frac{70}{13}$.",
+      "imageUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii01IC01IDExMCAxMTAiPgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMWUyOTNiIiBzdHJva2Utd2lkdGg9IjIiLz4KPHBhdGggZD0iTSAwIDEwMCBMIDEwMCA3MCBMIDUzIDAgTCAwIDEwMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQsNCIvPgo8bGluZSB4MT0iMCIgeTE9IjEwMCIgeDI9IjEwMCIgeTI9IjcwIiBzdHJva2U9IiMyNTYzZWIiIHN0cm9rZS13aWR0aD0iMiIvPgo8bGluZSB4MT0iMCIgeTE9IjEwMCIgeDI9IjUzIiB5Mj0iMCIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIiLz4KPHRleHQgeD0iLTUiIHk9IjEwNSIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjgiPkE8L3RleHQ+Cjx0ZXh0IHg9IjEwMiIgeT0iMTA1IiBmb250LWZhbWlseT0ic2VyaWYiIGZvbnQtc2l6ZT0iOCI+QjwvdGV4dD4KPHRleHQgeD0iMTAyIiB5PSItMiIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjgiPkM8L3RleHQ+Cjx0ZXh0IHg9Ii01IiB5PSItMiIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjgiPkQ8L3RleHQ+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjcwIiByPSIyIiBmaWxsPSJyZWQiLz4KPHRleHQgeD0iMTA1IiB5PSI3MCIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjgiPkU8L3RleHQ+CjxjaXJjbGUgY3g9IjUzIiBjeT0iMCIgcj0iMiIgZmlsbD0icmVkIi8+Cjx0ZXh0IHg9IjUzIiB5PSItNSIgZm9udC1mYW1pbHk9InNlcmlmIiBmb250LXNpemU9IjgiPkY8L3RleHQ+Cjwvc3ZnPg==",
+      "requiresImage": true,
+      "reviewStatus": "reviewed"
+    },
+    {
+      "id": "vr-sample-01",
+      "category": "Verbal Reasoning",
+      "text": "Three of the following four words are similar in meaning. Select the **ODD ONE OUT**.",
+      "options": [
+        "Ephemeral",
+        "Fleeting",
+        "Transient",
+        "Enduring",
+        "Temporary"
+      ],
+      "correctAnswerIndex": 3,
+      "explanation": "**Enduring** means lasting over a long period; durable. \\n\\n*Ephemeral*, *Fleeting*, *Transient*, and *Temporary* all describe things that last for a very short time. Therefore, 'Enduring' is the antonym to the others and is the odd one out.",
+      "requiresImage": false,
+      "reviewStatus": "reviewed"
+    }
+  ]
+}
