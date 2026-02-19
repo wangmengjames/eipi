@@ -1,20 +1,11 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# eipi — Selective Entry Preparation
 
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1Cli8U3ZXmaJnyLFY2BFGY6_HfEWwe1e2
+Australia's selective school exam preparation platform. 1,150+ expert-curated questions across VIC, NSW, QLD & WA.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:** Node.js
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. Install dependencies: `npm install`
+2. Copy `.env.local.example` to `.env.local` and fill in your Supabase credentials
+3. Run the app: `npm run dev`

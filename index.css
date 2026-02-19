@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ===== eipi — Global Styles ===== */
 
 /* Import JetBrains Mono for code feel */
