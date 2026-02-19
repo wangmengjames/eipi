@@ -31,7 +31,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-[#e6edf3] font-sans selection:bg-[#1f6feb]/20 overflow-x-hidden relative">
+    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 overflow-x-hidden relative">
       <AuthModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
@@ -45,7 +45,7 @@ const AppContent: React.FC = () => {
             <LandingPage onLoginClick={handleLoginClick} />
             <button
               onClick={() => handleLoginClick('teacher')}
-              className="fixed bottom-6 right-6 z-[100] p-3 bg-[#161b22] text-[#484f58] hover:text-[#58a6ff] border border-[#21262d] hover:border-[#30363d] rounded-full transition-all hover:scale-105 active:scale-95"
+              className="fixed bottom-6 right-6 z-[100] p-3 bg-white text-gray-300 hover:text-gray-600 border border-gray-200 hover:border-gray-300 rounded-full transition-all hover:scale-105 active:scale-95 shadow-sm"
               title="Staff Access"
               aria-label="Staff Login"
             >

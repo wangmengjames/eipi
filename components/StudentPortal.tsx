@@ -227,85 +227,78 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
   // --- INTRO ---
   const renderIntro = () => (
     <div className="max-w-4xl mx-auto py-12 px-6">
-      <header className="mb-12 flex justify-between items-start">
-         <div className="flex items-center gap-3 mb-2">
-            <div className="text-[#58a6ff] font-mono text-lg font-bold">
-                <span className="text-[#e6edf3]">eipi</span>
-                <span className="text-[#484f58]">/</span>
-                <span>exam</span>
+      <header className="mb-10 flex justify-between items-start">
+         <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-gray-900 text-white rounded-md flex items-center justify-center font-serif italic font-bold text-sm">
+              e<sup className="text-[8px] not-italic -mt-1">iπ</sup>
             </div>
+            <span className="font-semibold text-gray-900 text-sm">eipi</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-500 text-sm">exam</span>
          </div>
          <div className="flex items-center gap-3">
             {user?.pictureUrl ? (
-                <img src={user.pictureUrl} alt="Profile" className="w-9 h-9 rounded-full border border-[#21262d]" />
+                <img src={user.pictureUrl} alt="Profile" className="w-9 h-9 rounded-full border border-gray-200" />
             ) : (
-               <div className="w-9 h-9 bg-[#21262d] text-[#58a6ff] rounded-full flex items-center justify-center font-bold text-sm">
+               <div className="w-9 h-9 bg-gray-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm">
                    {user?.realName?.[0] || <User className="w-4 h-4" />}
                </div>
             )}
-            <span className="text-sm text-[#e6edf3]">{user?.realName || 'Student'}</span>
+            <span className="text-sm text-gray-700 font-medium">{user?.realName || 'Student'}</span>
          </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-         <div className="bg-[#161b22] p-5 rounded-lg border border-[#21262d]">
-            <div className="flex items-center gap-3 mb-1">
-               <Trophy className="w-5 h-5 text-[#58a6ff]" />
-               <span className="text-xs text-[#484f58] uppercase tracking-wider font-bold">Last Score</span>
-            </div>
-            <div className="text-2xl font-black text-[#e6edf3] font-mono">{stats.last}</div>
-         </div>
-         <div className="bg-[#161b22] p-5 rounded-lg border border-[#21262d]">
-            <div className="flex items-center gap-3 mb-1">
-               <BarChart3 className="w-5 h-5 text-[#d2a8ff]" />
-               <span className="text-xs text-[#484f58] uppercase tracking-wider font-bold">Average</span>
-            </div>
-            <div className="text-2xl font-black text-[#e6edf3] font-mono">{stats.avg}</div>
-         </div>
-         <div className="bg-[#161b22] p-5 rounded-lg border border-[#21262d]">
-            <div className="flex items-center gap-3 mb-1">
-               <Star className="w-5 h-5 text-[#3fb950]" />
-               <span className="text-xs text-[#484f58] uppercase tracking-wider font-bold">Best Topic</span>
-            </div>
-            <div className="text-lg font-bold text-[#e6edf3] truncate" title={stats.bestTopic}>{stats.bestTopic}</div>
-         </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+         {[
+           { icon: <Trophy className="w-5 h-5 text-blue-600" />, label: 'Last Score', value: stats.last },
+           { icon: <BarChart3 className="w-5 h-5 text-purple-500" />, label: 'Average', value: stats.avg },
+           { icon: <Star className="w-5 h-5 text-green-500" />, label: 'Best Topic', value: stats.bestTopic, small: true },
+         ].map((card, i) => (
+           <div key={i} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+             <div className="flex items-center gap-2 mb-2">
+               {card.icon}
+               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{card.label}</span>
+             </div>
+             <div className={`font-bold text-gray-900 ${card.small ? 'text-lg' : 'text-2xl'} truncate`} title={card.value}>{card.value}</div>
+           </div>
+         ))}
       </div>
 
       {/* Start Exam CTA */}
-      <div className="bg-[#161b22] border border-[#21262d] rounded-lg p-8 md:p-10 relative overflow-hidden">
-         <div className="absolute top-0 right-0 p-8 opacity-5">
-            <Award className="w-48 h-48 text-[#58a6ff]" />
+      <div className="bg-white border border-gray-200 rounded-2xl p-8 md:p-10 relative overflow-hidden shadow-sm">
+         <div className="absolute top-0 right-0 p-8 opacity-[0.04]">
+            <Award className="w-48 h-48 text-gray-900" />
          </div>
 
          <div className="relative z-10 max-w-lg">
-            <div className="font-mono text-[#58a6ff] text-sm mb-4">exam.start()</div>
-            <h2 className="text-2xl font-bold mb-6 text-[#e6edf3]">Ready for your practice exam?</h2>
-            <div className="space-y-3 mb-8 text-sm text-[#8b949e]">
-               <div className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-[#484f58]" /> <span>60 Minutes Time Limit</span>
-               </div>
-               <div className="flex items-center gap-3">
-                  <BookOpen className="w-4 h-4 text-[#484f58]" /> <span>50 Questions (Randomized)</span>
-               </div>
-               <div className="flex items-center gap-3">
-                  <EyeOff className="w-4 h-4 text-[#484f58]" /> <span>Secure Browser Environment</span>
-               </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Ready for your practice exam?</h2>
+            <p className="text-gray-500 mb-6 text-sm">A timed simulation designed to match real selective school conditions.</p>
+            <div className="space-y-2.5 mb-8">
+               {[
+                 { icon: <Clock className="w-4 h-4 text-gray-400" />, text: '60 Minutes Time Limit' },
+                 { icon: <BookOpen className="w-4 h-4 text-gray-400" />, text: '50 Questions — Randomized' },
+                 { icon: <EyeOff className="w-4 h-4 text-gray-400" />, text: 'Secure Browser Environment' },
+               ].map((item, i) => (
+                 <div key={i} className="flex items-center gap-3 text-sm text-gray-600">
+                   {item.icon} <span>{item.text}</span>
+                 </div>
+               ))}
             </div>
 
             <button
                onClick={startExam}
                disabled={isSyncing || bankSize === 0}
-               className="bg-[#238636] text-white hover:bg-[#2ea043] font-bold px-8 py-3 rounded-lg transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+               className="bg-gray-900 text-white hover:bg-gray-800 font-semibold px-8 py-3 rounded-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm"
             >
                {isSyncing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trophy className="w-5 h-5" />}
-               {isSyncing ? "Syncing Content..." : (bankSize > 0 ? "Start Practice Exam" : "No Content Available")}
+               {isSyncing ? "Syncing content..." : (bankSize > 0 ? "Start Practice Exam" : "No Content Available")}
             </button>
          </div>
       </div>
 
-      <div className="mt-10 flex justify-center">
-         <button onClick={onExit} className="text-[#484f58] hover:text-[#f85149] flex items-center gap-2 text-sm font-medium transition-colors">
-            <LogOut className="w-4 h-4" /> sign_out()
+      <div className="mt-8 flex justify-center">
+         <button onClick={onExit} className="text-gray-400 hover:text-red-500 flex items-center gap-2 text-sm font-medium transition-colors">
+            <LogOut className="w-4 h-4" /> Sign out
          </button>
       </div>
     </div>
@@ -325,17 +318,17 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
     };
 
     return (
-      <div className="flex flex-col h-screen bg-[#0d1117]">
+      <div className="flex flex-col h-screen bg-gray-50">
         {/* Exam Header */}
-        <header className="bg-[#161b22] border-b border-[#21262d] px-6 py-4 flex justify-between items-center z-20">
-           <div className="flex items-center gap-6">
+        <header className="bg-white border-b border-gray-200 px-6 py-3.5 flex justify-between items-center z-20 shadow-sm">
+           <div className="flex items-center gap-5">
               <div className="flex items-center gap-2">
-                 <span className="font-bold text-[#e6edf3] text-lg font-mono">{currentQuestionIndex + 1}</span>
-                 <span className="text-[#484f58] font-mono">/ {questions.length}</span>
+                 <span className="font-semibold text-gray-900 text-base">{currentQuestionIndex + 1}</span>
+                 <span className="text-gray-400">/ {questions.length}</span>
               </div>
-              <div className="h-6 w-px bg-[#21262d]"></div>
-              <div className={`flex items-center gap-2 font-mono font-medium text-lg ${timeLeft < 300 ? 'text-[#f85149] animate-pulse' : 'text-[#8b949e]'}`}>
-                 <Clock className="w-5 h-5" />
+              <div className="h-5 w-px bg-gray-200"></div>
+              <div className={`flex items-center gap-2 font-mono font-medium text-base ${timeLeft < 300 ? 'text-red-500 animate-pulse' : 'text-gray-600'}`}>
+                 <Clock className="w-4 h-4" />
                  {formatTime(timeLeft)}
               </div>
            </div>
@@ -348,10 +341,10 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
                    else newFlagged.add(currentQ.id);
                    setFlagged(newFlagged);
                 }}
-                className={`p-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium ${
+                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium border ${
                   isFlagged
-                    ? 'bg-[#da3633]/20 text-[#f85149] border border-[#f8514940]'
-                    : 'bg-[#21262d] text-[#484f58] hover:text-[#8b949e] border border-[#30363d]'
+                    ? 'bg-amber-50 text-amber-600 border-amber-200'
+                    : 'bg-white text-gray-500 hover:text-gray-700 border-gray-200'
                 }`}
               >
                  <Flag className={`w-4 h-4 ${isFlagged ? 'fill-current' : ''}`} />
@@ -359,7 +352,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
               </button>
               <button
                  onClick={handleRequestSubmit}
-                 className="bg-[#238636] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#2ea043] transition-colors"
+                 className="bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors"
               >
                  Finish Exam
               </button>
@@ -369,51 +362,51 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
         {/* Main Exam Area */}
         <div className="flex-1 overflow-hidden flex relative">
            {/* Sidebar */}
-           <div className="w-72 bg-[#161b22] border-r border-[#21262d] flex flex-col hidden md:flex">
-              <div className="p-4 border-b border-[#21262d] font-medium text-[#484f58] text-xs uppercase tracking-wider">Navigator</div>
+           <div className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
+              <div className="p-4 border-b border-gray-100 font-semibold text-gray-500 text-xs uppercase tracking-wider">Navigator</div>
               <div className="flex-1 overflow-y-auto p-4">
-                 <div className="grid grid-cols-5 gap-2">
+                 <div className="grid grid-cols-5 gap-1.5">
                     {questions.map((q, idx) => {
                        const isAns = answers[q.id] !== undefined;
                        const isCurr = idx === currentQuestionIndex;
                        const isFlg = flagged.has(q.id);
 
-                       let bgClass = "bg-[#0d1117] border-[#21262d] text-[#484f58]";
-                       if (isCurr) bgClass = "bg-[#58a6ff] text-white border-[#58a6ff] ring-2 ring-[#58a6ff]/30";
-                       else if (isFlg) bgClass = "bg-[#da3633]/10 border-[#f8514950] text-[#f85149]";
-                       else if (isAns) bgClass = "bg-[#388bfd]/10 border-[#388bfd50] text-[#58a6ff]";
+                       let cls = "bg-gray-100 border-gray-200 text-gray-500";
+                       if (isCurr) cls = "bg-gray-900 text-white border-gray-900 ring-2 ring-gray-900/20";
+                       else if (isFlg) cls = "bg-amber-50 border-amber-200 text-amber-600";
+                       else if (isAns) cls = "bg-blue-50 border-blue-200 text-blue-600";
 
                        return (
                           <button
                              key={q.id}
                              onClick={() => setCurrentQuestionIndex(idx)}
-                             className={`aspect-square rounded flex flex-col items-center justify-center text-xs font-bold border transition-all ${bgClass}`}
+                             className={`aspect-square rounded-md flex flex-col items-center justify-center text-xs font-semibold border transition-all ${cls}`}
                           >
                              {idx + 1}
-                             {isFlg && !isCurr && <div className="w-1.5 h-1.5 rounded-full bg-[#f85149] mt-0.5"></div>}
+                             {isFlg && !isCurr && <div className="w-1 h-1 rounded-full bg-amber-400 mt-0.5"></div>}
                           </button>
                        );
                     })}
                  </div>
               </div>
-              <div className="p-4 border-t border-[#21262d] text-xs text-[#484f58] flex flex-col gap-2">
-                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#58a6ff] rounded"></div> Current</div>
-                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#388bfd]/20 border border-[#388bfd50] rounded"></div> Answered</div>
-                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-[#da3633]/10 border border-[#f8514950] rounded"></div> Flagged</div>
+              <div className="p-4 border-t border-gray-100 text-xs text-gray-400 flex flex-col gap-2">
+                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-gray-900 rounded"></div> Current</div>
+                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-100 border border-blue-200 rounded"></div> Answered</div>
+                 <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-50 border border-amber-200 rounded"></div> Flagged</div>
               </div>
            </div>
 
            {/* Question Content */}
-           <div className="flex-1 overflow-y-auto p-6 md:p-10 relative">
+           <div className="flex-1 overflow-y-auto p-6 md:p-10">
               <div className="max-w-3xl mx-auto pb-24">
                  <div className="mb-8">
-                    <span className="inline-block px-3 py-1 rounded-full bg-[#388bfd]/10 text-[#58a6ff] text-xs font-bold mb-4 border border-[#388bfd30]">
+                    <span className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold mb-4 border border-blue-100">
                        {currentQ.topic || currentQ.category}
                     </span>
-                    <LatexRenderer text={currentQ.text} className="text-xl md:text-2xl font-medium text-[#e6edf3] leading-relaxed" />
+                    <LatexRenderer text={currentQ.text} className="text-xl md:text-2xl font-medium text-gray-900 leading-relaxed" />
                     {currentQ.imageUrl && (
-                       <div className="mt-6 border border-[#21262d] rounded-lg overflow-hidden">
-                          <img src={currentQ.imageUrl} alt="Diagram" className="w-full max-h-[400px] object-contain bg-[#161b22]" />
+                       <div className="mt-6 border border-gray-200 rounded-xl overflow-hidden">
+                          <img src={currentQ.imageUrl} alt="Diagram" className="w-full max-h-[400px] object-contain bg-gray-50" />
                        </div>
                     )}
                  </div>
@@ -423,23 +416,23 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
                        <button
                           key={idx}
                           onClick={() => setAnswers(prev => ({ ...prev, [currentQ.id]: idx }))}
-                          className={`w-full text-left p-4 rounded-lg border transition-all flex items-start gap-4 group ${
+                          className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-4 group ${
                              selectedAnswer === idx
-                                ? 'border-[#58a6ff] bg-[#388bfd]/10 ring-1 ring-[#58a6ff]/30'
-                                : 'border-[#21262d] hover:border-[#30363d] bg-[#161b22]'
+                                ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500/20 shadow-sm'
+                                : 'border-gray-200 hover:border-gray-300 bg-white shadow-sm'
                           }`}
                        >
                           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold shrink-0 transition-colors mt-0.5 ${
                              selectedAnswer === idx
-                               ? 'border-[#58a6ff] bg-[#58a6ff] text-white'
-                               : 'border-[#30363d] text-[#484f58] group-hover:border-[#58a6ff] group-hover:text-[#58a6ff]'
+                               ? 'border-blue-500 bg-blue-500 text-white'
+                               : 'border-gray-300 text-gray-400 group-hover:border-gray-400'
                           }`}>
                              {String.fromCharCode(65 + idx)}
                           </div>
                           <div className="flex-1 pt-0.5">
-                             <LatexRenderer text={option} className={`text-base ${selectedAnswer === idx ? 'text-[#e6edf3] font-medium' : 'text-[#8b949e]'}`} />
+                             <LatexRenderer text={option} className={`text-base ${selectedAnswer === idx ? 'text-gray-900 font-medium' : 'text-gray-600'}`} />
                              {currentQ.optionImages?.[idx] && (
-                                <img src={currentQ.optionImages[idx] || ''} alt="Option Visual" className="mt-2 max-h-32 rounded border border-[#21262d]" />
+                                <img src={currentQ.optionImages[idx] || ''} alt="Option Visual" className="mt-2 max-h-32 rounded-lg border border-gray-200" />
                              )}
                           </div>
                        </button>
@@ -449,21 +442,21 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
            </div>
 
            {/* Navigation Footer */}
-           <div className="absolute bottom-0 left-0 right-0 bg-[#161b22] border-t border-[#21262d] p-4 flex justify-between items-center md:pl-80 z-10">
+           <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-between items-center md:pl-[272px] z-10 shadow-sm">
               <button
                  onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
                  disabled={currentQuestionIndex === 0}
-                 className="px-6 py-2.5 rounded-lg border border-[#30363d] text-[#8b949e] font-medium hover:bg-[#21262d] disabled:opacity-50 flex items-center gap-2 text-sm"
+                 className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-2 text-sm transition-colors"
               >
                  <ChevronLeft className="w-4 h-4" /> Previous
               </button>
 
               <button
                  onClick={handleNext}
-                 className={`px-8 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all text-sm ${
+                 className={`px-7 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all text-sm ${
                      isLastQuestion
-                     ? 'bg-[#238636] text-white hover:bg-[#2ea043]'
-                     : 'bg-[#58a6ff] text-white hover:bg-[#79c0ff]'
+                     ? 'bg-green-600 text-white hover:bg-green-700'
+                     : 'bg-gray-900 text-white hover:bg-gray-800'
                  }`}
               >
                  {isLastQuestion ? (
@@ -477,21 +470,21 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
 
         {/* Warning Overlay */}
         {showCheatingWarning && (
-           <div className="fixed inset-0 z-50 bg-[#0d1117]/80 flex items-center justify-center p-6 backdrop-blur-sm">
-              <div className="bg-[#161b22] rounded-xl p-8 max-w-md text-center border border-[#21262d]">
-                 <div className="w-16 h-16 bg-[#da3633]/20 text-[#f85149] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle className="w-8 h-8" />
+           <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-6 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl p-8 max-w-md text-center border border-gray-200 shadow-xl">
+                 <div className="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="w-7 h-7" />
                  </div>
-                 <h2 className="text-xl font-bold text-[#e6edf3] mb-2">Focus Check</h2>
-                 <p className="text-[#8b949e] mb-6 text-sm leading-relaxed">
+                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Focus Check</h2>
+                 <p className="text-gray-500 mb-4 text-sm leading-relaxed">
                     Please keep the exam window active. Navigating away is recorded.
                  </p>
-                 <div className="bg-[#0d1117] border border-[#21262d] rounded-lg p-3 mb-6 text-xs font-mono text-[#f85149]">
-                    focus_lost_count: {cheatingAttempts}
+                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-6 text-xs font-mono text-red-500">
+                    focus_lost: {cheatingAttempts} time{cheatingAttempts !== 1 ? 's' : ''}
                  </div>
                  <button
                     onClick={() => setShowCheatingWarning(false)}
-                    className="w-full bg-[#21262d] text-[#e6edf3] py-3 rounded-lg font-bold hover:bg-[#30363d] transition-colors border border-[#30363d]"
+                    className="w-full bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition-colors"
                  >
                     Resume Exam
                  </button>
@@ -501,14 +494,14 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
 
         {/* Submit Modal */}
         {showSubmitModal && (
-            <div className="fixed inset-0 z-50 bg-[#0d1117]/80 flex items-center justify-center p-4 backdrop-blur-sm">
-                <div className="bg-[#161b22] rounded-xl p-8 max-w-sm w-full border border-[#21262d]">
-                    <h3 className="text-xl font-bold text-[#e6edf3] mb-2">Submit Exam?</h3>
-                    <p className="text-[#8b949e] mb-6 text-sm">
-                        You have answered <span className="font-bold text-[#58a6ff]">{Object.keys(answers).length}</span> out of <span className="font-bold text-[#58a6ff]">{questions.length}</span> questions.
+            <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl p-8 max-w-sm w-full border border-gray-200 shadow-xl">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Submit Exam?</h3>
+                    <p className="text-gray-500 mb-6 text-sm">
+                        You have answered <span className="font-semibold text-gray-900">{Object.keys(answers).length}</span> out of <span className="font-semibold text-gray-900">{questions.length}</span> questions.
                         {questions.length - Object.keys(answers).length > 0 && (
-                            <span className="block mt-2 text-[#f85149] bg-[#f8514920] p-2 rounded border border-[#f8514940] text-xs">
-                                <AlertTriangle className="w-3 h-3 inline mr-1" />
+                            <span className="flex items-center gap-1.5 mt-3 text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200 text-xs">
+                                <AlertTriangle className="w-3 h-3 shrink-0" />
                                 {questions.length - Object.keys(answers).length} questions unanswered.
                             </span>
                         )}
@@ -517,16 +510,16 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
                         <button
                             onClick={() => setShowSubmitModal(false)}
                             disabled={isSubmitting}
-                            className="flex-1 py-2.5 border border-[#30363d] rounded-lg text-[#8b949e] font-medium hover:bg-[#21262d] transition-colors text-sm"
+                            className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-medium hover:bg-gray-50 transition-colors text-sm"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={() => performSubmit()}
                             disabled={isSubmitting}
-                            className="flex-1 py-2.5 bg-[#238636] rounded-lg text-white font-bold hover:bg-[#2ea043] transition-colors flex items-center justify-center gap-2 text-sm"
+                            className="flex-1 py-2.5 bg-gray-900 rounded-xl text-white font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 text-sm"
                         >
-                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Submit'}
+                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit'}
                         </button>
                     </div>
                 </div>
@@ -544,55 +537,55 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
         const visibleIncorrect = freemiumConfig.limit;
 
         return (
-          <div className="max-w-5xl mx-auto py-12 px-6">
-             <div className="text-center mb-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#21262d] text-[#58a6ff] mb-4 border border-[#30363d]">
+          <div className="max-w-4xl mx-auto py-12 px-6">
+             <div className="text-center mb-10">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 text-gray-700 mb-4">
                    <Award className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-bold text-[#e6edf3] mb-2">Exam Completed</h2>
-                <p className="text-[#484f58] font-mono text-sm">result.summary()</p>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-1">Exam Complete</h2>
+                <p className="text-gray-400 text-sm">Here's how you did</p>
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                <div className="bg-[#161b22] p-6 rounded-lg border border-[#21262d] text-center">
-                   <div className="text-4xl font-black text-[#e6edf3] mb-1 font-mono">{result.score} <span className="text-lg text-[#484f58]">/ {result.total}</span></div>
-                   <div className="text-xs text-[#484f58] uppercase tracking-wider font-bold">Score</div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                   <div className="text-4xl font-bold text-gray-900 mb-1">{result.score} <span className="text-lg text-gray-400 font-normal">/ {result.total}</span></div>
+                   <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Score</div>
                 </div>
 
-                <div className="bg-[#161b22] p-6 rounded-lg border border-[#21262d] text-center">
-                   <div className="text-4xl font-black text-[#e6edf3] mb-1 font-mono">{result.percentage}%</div>
-                   <div className="text-xs text-[#484f58] uppercase tracking-wider font-bold">Accuracy</div>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                   <div className="text-4xl font-bold text-gray-900 mb-1">{result.percentage}%</div>
+                   <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Accuracy</div>
                 </div>
 
-                <div className="bg-[#161b22] p-6 rounded-lg border border-[#21262d] text-center cursor-pointer hover:border-[#30363d] transition-colors" onClick={() => { setReviewMode(true); setReviewFilter('incorrect'); }}>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm cursor-pointer hover:border-gray-300 transition-colors" onClick={() => { setReviewMode(true); setReviewFilter('incorrect'); }}>
                    {incorrectCount > 0 ? (
                       <>
-                         <div className="text-4xl font-black text-[#f85149] mb-1 font-mono">{incorrectCount}</div>
-                         <div className="text-xs text-[#484f58] uppercase tracking-wider font-bold mb-2">Mistakes</div>
-                         <div className="text-xs bg-[#da3633]/10 text-[#f85149] px-3 py-1 rounded-full border border-[#f8514940] inline-flex items-center gap-1.5">
+                         <div className="text-4xl font-bold text-red-500 mb-1">{incorrectCount}</div>
+                         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Mistakes</div>
+                         <div className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
                             <EyeOff className="w-3 h-3" />
-                            Review Limit: {visibleIncorrect} of {incorrectCount}
+                            Review: {visibleIncorrect} of {incorrectCount}
                          </div>
                       </>
                    ) : (
                       <>
-                         <div className="text-4xl font-black text-[#3fb950] mb-1 font-mono">0</div>
-                         <div className="text-xs text-[#484f58] uppercase tracking-wider font-bold">Perfect Score</div>
+                         <div className="text-4xl font-bold text-green-600 mb-1">0</div>
+                         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Perfect Score!</div>
                       </>
                    )}
                 </div>
              </div>
 
-             <div className="flex gap-4 justify-center">
+             <div className="flex gap-3 justify-center">
                 <button
                   onClick={() => { setExamState('intro'); setQuestions([]); }}
-                  className="px-6 py-3 bg-[#161b22] border border-[#21262d] text-[#8b949e] font-bold rounded-lg hover:bg-[#21262d] transition-colors flex items-center gap-2 text-sm"
+                  className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm shadow-sm"
                 >
                    <ArrowLeft className="w-4 h-4" /> Dashboard
                 </button>
                 <button
                   onClick={() => { setReviewMode(true); setReviewFilter('all'); }}
-                  className="px-8 py-3 bg-[#58a6ff] text-white font-bold rounded-lg hover:bg-[#79c0ff] transition-colors flex items-center gap-2 text-sm"
+                  className="px-8 py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm shadow-sm"
                 >
                    Review Answers <ChevronRight className="w-4 h-4" />
                 </button>
@@ -605,22 +598,22 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
         const isLocked = !freemiumConfig.allowedIds.has(currentQ.id);
 
         return (
-            <div className="flex flex-col h-screen bg-[#0d1117]">
-               <header className="bg-[#161b22] border-b border-[#21262d] px-6 py-4 flex justify-between items-center z-20 shrink-0">
+            <div className="flex flex-col h-screen bg-gray-50">
+               <header className="bg-white border-b border-gray-200 px-6 py-3.5 flex justify-between items-center z-20 shadow-sm">
                   <div className="flex items-center gap-4">
-                     <button onClick={() => setReviewMode(false)} className="p-2 hover:bg-[#21262d] rounded-lg transition-colors">
-                        <ArrowLeft className="w-5 h-5 text-[#8b949e]" />
+                     <button onClick={() => setReviewMode(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <ArrowLeft className="w-5 h-5 text-gray-500" />
                      </button>
-                     <h1 className="font-bold text-[#e6edf3] text-lg font-mono">review</h1>
+                     <h1 className="font-semibold text-gray-900">Review Answers</h1>
                   </div>
 
-                  <div className="flex bg-[#0d1117] p-1 rounded-lg border border-[#21262d]">
+                  <div className="flex bg-gray-100 p-1 rounded-lg">
                       {['all', 'incorrect', 'flagged'].map((f) => (
                           <button
                              key={f}
                              onClick={() => setReviewFilter(f as any)}
                              className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${
-                               reviewFilter === f ? 'bg-[#21262d] text-[#58a6ff]' : 'text-[#484f58] hover:text-[#8b949e]'
+                               reviewFilter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                              }`}
                           >
                              {f}
@@ -631,8 +624,8 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
 
                <div className="flex-1 overflow-hidden flex">
                   {/* Sidebar */}
-                  <div className="w-80 bg-[#161b22] border-r border-[#21262d] flex flex-col overflow-hidden hidden md:flex">
-                     <div className="p-4 border-b border-[#21262d] text-xs font-bold text-[#484f58] uppercase tracking-wider">
+                  <div className="w-72 bg-white border-r border-gray-200 flex flex-col overflow-hidden hidden md:flex">
+                     <div className="p-4 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         Questions
                      </div>
                      <div className="flex-1 overflow-y-auto">
@@ -650,21 +643,21 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
                               <button
                                  key={q.id}
                                  onClick={() => setCurrentQuestionIndex(idx)}
-                                 className={`w-full text-left p-4 border-b border-[#21262d]/50 hover:bg-[#0d1117] transition-colors flex items-start gap-3 ${
-                                   isCurr ? 'bg-[#0d1117] border-l-2 border-l-[#58a6ff]' : 'border-l-2 border-l-transparent'
+                                 className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-start gap-3 ${
+                                   isCurr ? 'bg-gray-50 border-l-2 border-l-gray-900' : 'border-l-2 border-l-transparent'
                                  }`}
                               >
                                  <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                                   isCorrect ? 'bg-[#238636]/20 text-[#3fb950]' : 'bg-[#da3633]/20 text-[#f85149]'
+                                   isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'
                                  }`}>
                                     {isCorrect ? <CheckCircle className="w-3 h-3" /> : <X className="w-3 h-3" />}
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-center mb-1">
-                                       <span className={`text-sm font-bold ${isCurr ? 'text-[#58a6ff]' : 'text-[#e6edf3]'}`}>Q{idx + 1}</span>
-                                       {isRestricted && <Lock className="w-3 h-3 text-[#484f58]" />}
+                                    <div className="flex justify-between items-center mb-0.5">
+                                       <span className={`text-sm font-semibold ${isCurr ? 'text-gray-900' : 'text-gray-700'}`}>Q{idx + 1}</span>
+                                       {isRestricted && <Lock className="w-3 h-3 text-gray-400" />}
                                     </div>
-                                    <p className="text-xs text-[#484f58] truncate">{q.text.substring(0, 40)}...</p>
+                                    <p className="text-xs text-gray-400 truncate">{q.text.substring(0, 40)}...</p>
                                  </div>
                               </button>
                            );
@@ -676,29 +669,29 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
                   <div className="flex-1 overflow-y-auto p-6 md:p-10">
                      <div className="max-w-3xl mx-auto pb-20">
                         <div className="flex items-center gap-3 mb-6 flex-wrap">
-                           <span className="bg-[#21262d] text-[#8b949e] px-3 py-1 rounded-full text-xs font-bold border border-[#30363d]">
+                           <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
                               {currentQ.topic || 'General'}
                            </span>
                            {answers[currentQ.id] === currentQ.correctAnswerIndex ? (
-                               <span className="flex items-center gap-1.5 text-[#3fb950] font-bold text-sm bg-[#238636]/10 px-3 py-1 rounded-full border border-[#238636]/30">
+                               <span className="flex items-center gap-1.5 text-green-600 font-semibold text-sm bg-green-50 px-3 py-1 rounded-full border border-green-200">
                                   <CheckCircle className="w-4 h-4" /> Correct
                                </span>
                            ) : (
-                               <span className="flex items-center gap-1.5 text-[#f85149] font-bold text-sm bg-[#da3633]/10 px-3 py-1 rounded-full border border-[#da3633]/30">
+                               <span className="flex items-center gap-1.5 text-red-500 font-semibold text-sm bg-red-50 px-3 py-1 rounded-full border border-red-200">
                                   <XCircle className="w-4 h-4" /> Incorrect
                                </span>
                            )}
                            {isLocked && (
-                               <span className="ml-auto flex items-center gap-1.5 text-[#d29922] font-bold text-xs bg-[#bb8009]/10 px-3 py-1 rounded-full border border-[#bb8009]/30">
+                               <span className="ml-auto flex items-center gap-1.5 text-amber-600 font-semibold text-xs bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
                                   <Lock className="w-3 h-3" /> Premium Locked
                                </span>
                            )}
                         </div>
 
                         <div className="mb-8">
-                           <LatexRenderer text={currentQ.text} className="text-xl text-[#e6edf3] leading-relaxed" />
+                           <LatexRenderer text={currentQ.text} className="text-xl text-gray-900 leading-relaxed" />
                            {currentQ.imageUrl && (
-                              <img src={currentQ.imageUrl} alt="Context" className="mt-6 max-h-[300px] rounded-lg border border-[#21262d]" />
+                              <img src={currentQ.imageUrl} alt="Context" className="mt-6 max-h-[300px] rounded-xl border border-gray-200" />
                            )}
                         </div>
 
@@ -707,54 +700,53 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
                               const isSelected = answers[currentQ.id] === idx;
                               const isCorrect = currentQ.correctAnswerIndex === idx;
 
-                              let style = "border-[#21262d] bg-[#161b22]";
-                              if (isCorrect) style = "border-[#238636] bg-[#238636]/10 ring-1 ring-[#238636]/30";
-                              else if (isSelected && !isCorrect) style = "border-[#da3633] bg-[#da3633]/10";
+                              let style = "border-gray-200 bg-white";
+                              if (isCorrect) style = "border-green-400 bg-green-50 ring-1 ring-green-400/20";
+                              else if (isSelected && !isCorrect) style = "border-red-400 bg-red-50";
 
                               return (
-                                 <div key={idx} className={`p-4 rounded-lg border flex items-start gap-4 ${style} relative overflow-hidden`}>
+                                 <div key={idx} className={`p-4 rounded-xl border flex items-start gap-4 ${style} relative overflow-hidden shadow-sm`}>
                                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                                       isCorrect ? 'border-[#3fb950] bg-[#238636] text-white' : (isSelected ? 'border-[#f85149] text-[#f85149]' : 'border-[#30363d] text-[#484f58]')
+                                       isCorrect ? 'border-green-500 bg-green-500 text-white' : (isSelected ? 'border-red-400 text-red-400' : 'border-gray-300 text-gray-400')
                                      }`}>
                                         {String.fromCharCode(65 + idx)}
                                      </div>
                                      <div className="flex-1">
-                                         <LatexRenderer text={opt} className="text-[#e6edf3]" />
+                                         <LatexRenderer text={opt} className="text-gray-800" />
                                          {currentQ.optionImages?.[idx] && (
-                                            <img src={currentQ.optionImages[idx] || ''} className="mt-2 h-16 rounded border border-[#21262d]" />
+                                            <img src={currentQ.optionImages[idx] || ''} className="mt-2 h-16 rounded-lg border border-gray-200" />
                                          )}
                                      </div>
-                                     {isCorrect && <CheckCircle className="w-5 h-5 text-[#3fb950] absolute top-4 right-4" />}
-                                     {isSelected && !isCorrect && <XCircle className="w-5 h-5 text-[#f85149] absolute top-4 right-4" />}
+                                     {isCorrect && <CheckCircle className="w-5 h-5 text-green-500 absolute top-4 right-4" />}
+                                     {isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-400 absolute top-4 right-4" />}
                                  </div>
                               );
                            })}
                         </div>
 
                         {/* Explanation */}
-                        <div className="relative rounded-lg overflow-hidden border border-[#21262d]">
-                            <div className={`bg-[#161b22] p-6 ${isLocked ? 'filter blur-md select-none opacity-50' : ''}`}>
-                                <h3 className="font-bold text-[#e6edf3] mb-3 flex items-center gap-2">
-                                    <BookOpen className="w-5 h-5 text-[#58a6ff]" /> Explanation
+                        <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                            <div className={`bg-white p-6 ${isLocked ? 'filter blur-md select-none opacity-50' : ''}`}>
+                                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <BookOpen className="w-5 h-5 text-blue-600" /> Explanation
                                 </h3>
-                                <LatexRenderer text={currentQ.explanation || "No explanation provided."} className="text-[#8b949e] leading-relaxed" />
+                                <LatexRenderer text={currentQ.explanation || "No explanation provided."} className="text-gray-600 leading-relaxed" />
                                 {currentQ.explanationImageUrl && (
-                                    <img src={currentQ.explanationImageUrl} className="mt-4 rounded border border-[#21262d]" />
+                                    <img src={currentQ.explanationImageUrl} className="mt-4 rounded-xl border border-gray-200" />
                                 )}
                             </div>
 
                             {isLocked && (
-                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0d1117]/60 backdrop-blur-sm p-6 text-center">
-                                    <div className="bg-[#21262d] text-[#d29922] p-4 rounded-full mb-4 border border-[#30363d]">
+                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm p-6 text-center">
+                                    <div className="bg-gray-100 text-gray-500 p-4 rounded-2xl mb-4">
                                         <Lock className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-[#e6edf3] mb-2">Detailed Analysis Locked</h3>
-                                    <p className="text-[#8b949e] mb-6 max-w-md text-sm">
-                                        You have exceeded the free preview limit for this session.
-                                        Upgrade to Premium for full explanations.
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Detailed Analysis Locked</h3>
+                                    <p className="text-gray-500 mb-6 max-w-md text-sm">
+                                        You've reached the free preview limit. Upgrade to Premium for full explanations.
                                     </p>
-                                    <button className="bg-gradient-to-r from-[#58a6ff] to-[#d2a8ff] text-white font-bold py-3 px-8 rounded-lg transition-all flex items-center gap-2 text-sm">
-                                        <Crown className="w-5 h-5" /> Unlock Premium Access
+                                    <button className="bg-gray-900 text-white font-semibold py-3 px-8 rounded-xl transition-all flex items-center gap-2 text-sm hover:bg-gray-800">
+                                        <Crown className="w-5 h-5" /> Unlock Premium
                                     </button>
                                 </div>
                             )}
@@ -769,14 +761,14 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
 
   if (examState === 'intro') {
     return (
-      <div className="min-h-screen bg-[#0d1117] text-[#e6edf3] font-mono">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         {renderIntro()}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-[#e6edf3] font-mono">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
         {examState === 'active' && renderActiveExam()}
         {examState === 'result' && renderResult()}
     </div>

@@ -214,18 +214,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
 
   if (!isOpen) return null;
 
-  const inputClasses = "w-full bg-[#0d1117] border border-[#21262d] rounded-lg px-4 py-3 text-[#e6edf3] placeholder-[#484f58] focus:ring-1 focus:ring-[#58a6ff] focus:border-[#58a6ff] outline-none transition-all text-sm";
-  const inputWithIconClasses = "w-full bg-[#0d1117] border border-[#21262d] rounded-lg pl-10 pr-4 py-3 text-[#e6edf3] placeholder-[#484f58] focus:ring-1 focus:ring-[#58a6ff] focus:border-[#58a6ff] outline-none transition-all text-sm";
-  const labelClasses = "block text-xs font-bold text-[#484f58] uppercase mb-1.5 ml-0.5 tracking-wider";
-  const primaryBtnClasses = "w-full bg-[#238636] text-white hover:bg-[#2ea043] font-bold text-sm rounded-lg px-4 py-3 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
-  const ghostBtnClasses = "w-full text-[#484f58] hover:text-[#e6edf3] text-sm font-medium transition-colors";
+  const inputClasses = "w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm";
+  const inputWithIconClasses = "w-full bg-white border border-gray-300 rounded-lg pl-10 pr-4 py-3 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm";
+  const labelClasses = "block text-xs font-semibold text-gray-600 mb-1.5 ml-0.5";
+  const primaryBtnClasses = "w-full bg-gray-900 text-white hover:bg-gray-800 font-semibold text-sm rounded-lg px-4 py-3 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
+  const ghostBtnClasses = "w-full text-gray-400 hover:text-gray-700 text-sm font-medium transition-colors";
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0d1117]/80 backdrop-blur-md animate-in fade-in duration-200">
-        <div className="bg-[#161b22] rounded-xl border border-[#21262d] shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 text-[#484f58] hover:text-[#e6edf3] rounded-lg hover:bg-[#21262d] transition-colors z-10"
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors z-10"
             >
                 <X className="w-5 h-5" />
             </button>
@@ -236,15 +236,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                     <>
                     {studentStep === 'email' && (
                         <div className="text-center">
-                            <div className="text-[#58a6ff] font-mono text-sm mb-6">student.login()</div>
-                            <h2 className="text-xl font-bold text-[#e6edf3] mb-1">Student Login</h2>
-                            <p className="text-[#484f58] mb-8 text-sm">Enter your email to get started.</p>
+                            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-5">
+                              <Mail className="w-6 h-6 text-gray-600" />
+                            </div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-1">Sign in</h2>
+                            <p className="text-gray-500 mb-8 text-sm">Enter your email to get started.</p>
 
                             <form onSubmit={handleEmailSubmit} className="space-y-4 text-left">
                                 <div>
                                     <label className={labelClasses}>Email Address</label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#484f58]" />
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                         <input
                                             type="email"
                                             value={studentEmail}
@@ -258,7 +260,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 </div>
 
                                 {authError && (
-                                    <div className="text-[#f85149] text-sm flex items-center gap-2 bg-[#f8514920] p-3 rounded-lg border border-[#f8514940]">
+                                    <div className="text-red-600 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-200">
                                         <AlertCircle className="w-4 h-4 shrink-0" /> {authError}
                                     </div>
                                 )}
@@ -272,11 +274,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
 
                     {studentStep === 'password' && (
                         <div className="text-center animate-in slide-in-from-right-10 duration-300">
-                             <div className="w-12 h-12 bg-[#21262d] text-[#58a6ff] rounded-full flex items-center justify-center mx-auto mb-3">
+                             <div className="w-12 h-12 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center mx-auto mb-5">
                                 <Lock className="w-6 h-6" />
                              </div>
-                             <h2 className="text-xl font-bold text-[#e6edf3] mb-1">Welcome back!</h2>
-                             <p className="text-[#484f58] mb-6 text-sm font-mono">{studentEmail}</p>
+                             <h2 className="text-xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
+                             <p className="text-gray-500 mb-6 text-sm">{studentEmail}</p>
 
                              <form onSubmit={handlePasswordLogin} className="space-y-4 text-left">
                                 <div>
@@ -293,13 +295,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 </div>
 
                                 {authError && (
-                                    <div className="text-[#f85149] text-sm flex items-center gap-2 bg-[#f8514920] p-3 rounded-lg border border-[#f8514940]">
+                                    <div className="text-red-600 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-200">
                                         <AlertCircle className="w-4 h-4 shrink-0" /> {authError}
                                     </div>
                                 )}
 
                                 <button type="submit" disabled={isLoggingIn} className={primaryBtnClasses}>
-                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Login'}
+                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign in'}
                                 </button>
 
                                 <div className="text-center pt-2">
@@ -311,7 +313,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                             setIsLoggingIn(false);
                                             setStudentStep('verify');
                                         }}
-                                        className="text-sm text-[#58a6ff] hover:text-[#79c0ff] font-medium"
+                                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                                     >
                                         Forgot password? Use a code instead
                                     </button>
@@ -329,17 +331,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
 
                     {studentStep === 'verify' && (
                         <div className="text-center animate-in slide-in-from-right-10 duration-300">
-                             <h2 className="text-xl font-bold text-[#e6edf3] mb-2">Check your Email</h2>
-                             <p className="text-[#484f58] mb-8 text-sm">
-                                We sent a 6-digit code to <strong className="text-[#e6edf3]">{studentEmail}</strong>.<br/>
-                                <span className="text-xs text-[#58a6ff]">(Check browser alert for demo code)</span>
+                             <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your email</h2>
+                             <p className="text-gray-500 mb-8 text-sm">
+                                We sent a 6-digit code to <strong className="text-gray-900">{studentEmail}</strong>.<br/>
+                                <span className="text-xs text-blue-600">(Check browser alert for demo code)</span>
                              </p>
 
                              <form onSubmit={handleVerifyCode} className="space-y-6 text-left">
                                 <div>
                                     <label className={labelClasses}>Verification Code</label>
                                     <div className="relative">
-                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#484f58]" />
+                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                         <input
                                             type="text"
                                             value={verifyCodeInput}
@@ -354,7 +356,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 </div>
 
                                 {authError && (
-                                    <div className="text-[#f85149] text-sm flex items-center gap-2 bg-[#f8514920] p-3 rounded-lg border border-[#f8514940]">
+                                    <div className="text-red-600 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-200">
                                         <AlertCircle className="w-4 h-4 shrink-0" /> {authError}
                                     </div>
                                 )}
@@ -377,17 +379,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                     {studentStep === 'register' && (
                         <div className="animate-in slide-in-from-right-10 duration-300">
                             <div className="text-center mb-6">
-                                <div className="w-12 h-12 bg-[#21262d] text-[#58a6ff] rounded-full flex items-center justify-center mx-auto mb-3">
+                                <div className="w-12 h-12 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                     <User className="w-6 h-6" />
                                 </div>
-                                <h2 className="text-xl font-bold text-[#e6edf3]">Create your profile</h2>
-                                <p className="text-[#484f58] text-sm font-mono">{studentEmail}</p>
+                                <h2 className="text-xl font-semibold text-gray-900">Create your profile</h2>
+                                <p className="text-gray-500 text-sm">{studentEmail}</p>
                             </div>
 
                             <form onSubmit={handleRegistrationSubmit} className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className={labelClasses}>Real Name</label>
+                                        <label className={labelClasses}>Full Name</label>
                                         <input
                                             required
                                             value={regData.realName}
@@ -423,7 +425,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 <div>
                                     <label className={labelClasses}>School</label>
                                     <div className="relative">
-                                        <School className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#484f58]" />
+                                        <School className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                         <input
                                             required
                                             value={regData.school}
@@ -441,8 +443,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                             required
                                             value={regData.yearLevel}
                                             onChange={e => setRegData({...regData, yearLevel: e.target.value})}
-                                            className={`${inputClasses} bg-[#0d1117]`}
-                                            style={{ colorScheme: 'dark' }}
+                                            className={inputClasses}
                                         >
                                             <option value="">Select</option>
                                             <option value="Year 7">Year 7</option>
@@ -456,8 +457,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                         <select
                                             value={regData.referralSource}
                                             onChange={e => setRegData({...regData, referralSource: e.target.value})}
-                                            className={`${inputClasses} bg-[#0d1117]`}
-                                            style={{ colorScheme: 'dark' }}
+                                            className={inputClasses}
                                         >
                                             <option value="">Optional</option>
                                             <option value="Friend">Friend</option>
@@ -468,13 +468,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 </div>
 
                                 {authError && (
-                                    <div className="text-[#f85149] text-sm flex items-center gap-2 bg-[#f8514920] p-3 rounded-lg border border-[#f8514940]">
+                                    <div className="text-red-600 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-200">
                                         <AlertCircle className="w-4 h-4 shrink-0" /> {authError}
                                     </div>
                                 )}
 
                                 <button type="submit" disabled={isLoggingIn} className={`${primaryBtnClasses} mt-2`}>
-                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Complete Registration'}
+                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
                                 </button>
                             </form>
                         </div>
@@ -485,18 +485,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                 {/* --- TEACHER LOGIN --- */}
                 {target === 'teacher' && (
                     <div className="text-center">
-                    <div className="w-16 h-16 bg-[#21262d] text-[#484f58] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#30363d]">
-                        <ShieldCheck className="w-8 h-8" />
+                    <div className="w-14 h-14 bg-gray-100 text-gray-500 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <ShieldCheck className="w-7 h-7" />
                     </div>
-                    <div className="text-[#58a6ff] font-mono text-sm mb-2">admin.auth()</div>
-                    <h2 className="text-xl font-bold text-[#e6edf3] mb-1">Staff Access</h2>
-                    <p className="text-[#484f58] mb-8 text-sm">Restricted to authorized faculty.</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Staff Access</h2>
+                    <p className="text-gray-500 mb-8 text-sm">Restricted to authorized faculty.</p>
 
                     <form onSubmit={handleTeacherLogin} className="space-y-4 text-left">
                         <div>
                             <label className={labelClasses}>Admin Email</label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#484f58]" />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
                                     type="email"
                                     value={adminEmailInput}
@@ -512,7 +511,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                         <div>
                             <label className={labelClasses}>Access Code</label>
                             <div className="relative">
-                                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#484f58]" />
+                                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
                                     type="password"
                                     value={adminPasswordInput}
@@ -525,14 +524,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                         </div>
 
                         {lockoutUntil && (
-                            <div className="p-3 bg-[#f8514920] border border-[#f8514940] rounded-lg flex items-center gap-2 text-[#f85149] text-sm font-medium animate-pulse">
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm font-medium animate-pulse">
                                 <Clock className="w-4 h-4" />
                                 <span>Access blocked for {timeRemaining}s</span>
                             </div>
                         )}
 
                         {authError && !lockoutUntil && (
-                            <div className="p-3 bg-[#f8514920] border border-[#f8514940] rounded-lg flex items-center gap-2 text-[#f85149] text-sm font-medium">
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm font-medium">
                                 <AlertCircle className="w-4 h-4" />
                                 <span>{authError}</span>
                             </div>
@@ -541,7 +540,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                         <button
                             type="submit"
                             disabled={isLoggingIn || !!lockoutUntil || !adminPasswordInput}
-                            className="w-full bg-[#21262d] text-[#e6edf3] hover:bg-[#30363d] font-bold text-sm rounded-lg px-4 py-3 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed border border-[#30363d] mt-2"
+                            className="w-full bg-gray-900 text-white hover:bg-gray-800 font-semibold text-sm rounded-lg px-4 py-3 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                         >
                             {isLoggingIn ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -555,8 +554,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
             </div>
 
             {/* Footer */}
-            <div className="bg-[#0d1117] px-8 py-4 border-t border-[#21262d] text-center">
-                <p className="text-xs text-[#484f58]">
+            <div className="bg-gray-50 px-8 py-4 border-t border-gray-200 text-center">
+                <p className="text-xs text-gray-400">
                     {target === 'student'
                         ? 'By continuing, you agree to our Terms and Privacy Policy.'
                         : 'Unauthorized access attempts are logged.'}

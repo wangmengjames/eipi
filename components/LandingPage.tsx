@@ -6,7 +6,7 @@ interface LandingPageProps {
   onLoginClick: (target: 'student' | 'teacher') => void;
 }
 
-// --- Typing animation hook (skip on revisit) ---
+// --- Typing animation hook ---
 const useTypingEffect = (text: string, speed: number = 40, startDelay: number = 0) => {
   const hasPlayed = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('eipi_hero_played') === '1';
   const [displayed, setDisplayed] = useState(hasPlayed ? text : '');
@@ -32,14 +32,14 @@ const useTypingEffect = (text: string, speed: number = 40, startDelay: number = 
   return { displayed, done };
 };
 
-// --- Terminal-style code block ---
+// --- Code block (light theme) ---
 const CodeBlock: React.FC<{ children: React.ReactNode; className?: string; title?: string }> = ({ children, className, title }) => (
-  <div className={`bg-[#0d1117] border border-[#21262d] rounded-lg overflow-hidden font-mono text-sm ${className || ''}`}>
-    <div className="flex items-center gap-2 px-4 py-2.5 bg-[#161b22] border-b border-[#21262d]">
-      <div className="w-3 h-3 rounded-full bg-[#f85149]/80"></div>
-      <div className="w-3 h-3 rounded-full bg-[#d29922]/80"></div>
-      <div className="w-3 h-3 rounded-full bg-[#3fb950]/80"></div>
-      <span className="ml-2 text-xs text-[#484f58]">{title || 'eipi'}</span>
+  <div className={`bg-gray-50 border border-gray-200 rounded-xl overflow-hidden font-mono text-sm ${className || ''}`}>
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 border-b border-gray-200">
+      <div className="w-3 h-3 rounded-full bg-red-400/70"></div>
+      <div className="w-3 h-3 rounded-full bg-yellow-400/70"></div>
+      <div className="w-3 h-3 rounded-full bg-green-400/70"></div>
+      <span className="ml-2 text-xs text-gray-400">{title || 'eipi'}</span>
     </div>
     <div className="p-5 leading-relaxed">{children}</div>
   </div>
@@ -73,7 +73,7 @@ const Counter: React.FC<{ end: number; suffix?: string; duration?: number }> = (
   return <div ref={ref}>{count}{suffix}</div>;
 };
 
-// --- Scroll reveal wrapper ---
+// --- Scroll reveal ---
 const Reveal: React.FC<{ children: React.ReactNode; className?: string; delay?: number }> = ({ children, className, delay = 0 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -106,7 +106,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
   const heroLine3 = useTypingEffect('// → 1150+ questions loaded', 30, 3200);
   const heroLine4 = useTypingEffect('exam.start();', 35, 4200);
 
-  // Mark hero animation as played
   useEffect(() => {
     if (heroLine4.done) {
       try { sessionStorage.setItem('eipi_hero_played', '1'); } catch {}
@@ -122,7 +121,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on scroll
   useEffect(() => {
     if (mobileMenuOpen && scrollY > 100) setMobileMenuOpen(false);
   }, [scrollY]);
@@ -130,32 +128,38 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
   return (
     <>
       {/* ===== NAVIGATION ===== */}
-      <nav className={`fixed w-full z-50 top-0 transition-all duration-300 ${scrollY > 50 ? 'bg-[#0d1117]/95 backdrop-blur-md border-b border-[#21262d]' : 'bg-transparent'}`}>
+      <nav className={`fixed w-full z-50 top-0 transition-all duration-300 ${scrollY > 50 ? 'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm' : 'bg-transparent'}`}>
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3 group cursor-default">
-            <div className="w-9 h-9 bg-[#161b22] border border-[#30363d] text-[#e6edf3] rounded-md flex items-center justify-center font-serif italic font-bold text-lg transition-all group-hover:border-[#58a6ff] group-hover:shadow-[0_0_12px_rgba(88,166,255,0.15)]">
-               e<sup className="text-[9px] not-italic -mt-1.5 text-[#58a6ff]">iπ</sup>
+          <div className="flex items-center gap-2.5 cursor-default">
+            <div className="w-8 h-8 bg-gray-900 text-white rounded-lg flex items-center justify-center font-serif italic font-bold text-base">
+               e<sup className="text-[9px] not-italic -mt-1.5">iπ</sup>
             </div>
-            <span className="font-mono font-semibold text-[#e6edf3] text-sm tracking-tight">eipi<span className="text-[#484f58]">.edu</span></span>
+            <span className="font-semibold text-gray-900 text-sm tracking-tight">eipi<span className="text-gray-400">.edu</span></span>
           </div>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-sm text-[#8b949e] hover:text-[#e6edf3] transition-colors font-mono">features</a>
-            <a href="#pricing" className="text-sm text-[#8b949e] hover:text-[#e6edf3] transition-colors font-mono">pricing</a>
-            <a href="#stats" className="text-sm text-[#8b949e] hover:text-[#e6edf3] transition-colors font-mono">stats</a>
+            <a href="#features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Features</a>
+            <a href="#pricing" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Pricing</a>
+            <a href="#stats" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Stats</a>
             <button
               onClick={() => onLoginClick('student')}
-              className="px-4 py-2 text-sm font-mono font-medium text-[#e6edf3] bg-[#21262d] border border-[#30363d] rounded-md hover:bg-[#30363d] hover:border-[#8b949e] transition-all"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm"
             >
-              sign_in()
+              Sign in
+            </button>
+            <button
+              onClick={() => onLoginClick('student')}
+              className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-all shadow-sm"
+            >
+              Get started
             </button>
           </div>
 
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-[#8b949e] hover:text-[#e6edf3] transition-colors"
+            className="md:hidden p-2 text-gray-500 hover:text-gray-900 transition-colors"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -163,74 +167,73 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
 
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#161b22] border-t border-[#21262d] px-6 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
-            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block text-sm text-[#8b949e] hover:text-[#e6edf3] font-mono py-2">features</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-sm text-[#8b949e] hover:text-[#e6edf3] font-mono py-2">pricing</a>
-            <a href="#stats" onClick={() => setMobileMenuOpen(false)} className="block text-sm text-[#8b949e] hover:text-[#e6edf3] font-mono py-2">stats</a>
+          <div className="md:hidden bg-white border-t border-gray-200 px-6 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-lg">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block text-sm text-gray-600 hover:text-gray-900 py-2">Features</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-sm text-gray-600 hover:text-gray-900 py-2">Pricing</a>
+            <a href="#stats" onClick={() => setMobileMenuOpen(false)} className="block text-sm text-gray-600 hover:text-gray-900 py-2">Stats</a>
             <button
               onClick={() => { onLoginClick('student'); setMobileMenuOpen(false); }}
-              className="w-full px-4 py-2.5 text-sm font-mono font-medium text-white bg-[#1f6feb] rounded-md"
+              className="w-full px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
             >
-              sign_in()
+              Get started free
             </button>
           </div>
         )}
       </nav>
 
       {/* ===== HERO SECTION ===== */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#0d1117]">
-        {/* Grid background */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
-          backgroundImage: `linear-gradient(rgba(88,166,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(88,166,255,0.3) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
+        {/* Subtle grid */}
+        <div className="absolute inset-0 opacity-[0.4]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }}></div>
 
         {/* Gradient orbs */}
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-[#1f6feb]/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-[#8b5cf6]/8 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-50 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-50 rounded-full blur-[120px] pointer-events-none"></div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-16">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
             {/* Left: Text */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1f6feb]/10 border border-[#1f6feb]/20 text-[#58a6ff] text-xs font-mono mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950] animate-pulse"></span>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-medium mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                 v2026 — now live
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-[#e6edf3] mb-5 leading-[1.12] tracking-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-gray-900 mb-5 leading-[1.1] tracking-tight">
                 Selective entry,<br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#58a6ff] to-[#bc8cff]">solved systematically.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">solved systematically.</span>
               </h1>
 
-              <p className="text-[#8b949e] text-lg leading-relaxed mb-8 max-w-lg">
+              <p className="text-gray-500 text-lg leading-relaxed mb-8 max-w-lg">
                 1,150+ expert-curated questions across VIC, NSW, QLD &amp; WA. Timed simulations. Instant analytics. No fluff.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <button
                   onClick={() => onLoginClick('student')}
-                  className="group px-6 py-3.5 bg-[#1f6feb] hover:bg-[#388bfd] text-white rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#1f6feb]/20 hover:shadow-[#1f6feb]/30"
+                  className="group px-6 py-3.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Mail className="w-4 h-4" />
-                  Start practicing
+                  Start practising
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </button>
                 <a
                   href="#features"
-                  className="px-6 py-3.5 text-[#8b949e] hover:text-[#e6edf3] border border-[#21262d] hover:border-[#30363d] rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+                  className="px-6 py-3.5 text-gray-600 hover:text-gray-900 border border-gray-300 hover:border-gray-400 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
                 >
                   Learn more
                   <ChevronRight className="w-4 h-4" />
                 </a>
               </div>
 
-              {/* Quick trust signals */}
-              <div className="flex items-center gap-4 text-xs text-[#484f58] font-mono">
-                <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-[#3fb950]" /> Free to start</span>
-                <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-[#3fb950]" /> No credit card</span>
-                <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-[#3fb950]" /> Instant access</span>
+              {/* Trust signals */}
+              <div className="flex items-center gap-5 text-xs text-gray-400">
+                <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-green-500" /> Free to start</span>
+                <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-green-500" /> No credit card</span>
+                <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-green-500" /> Instant access</span>
               </div>
             </div>
 
@@ -238,75 +241,75 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
             <div className="hidden lg:block">
               <CodeBlock>
                 <div className="space-y-1.5 text-[13px]">
-                  <div className="text-[#484f58]">{'// selective-entry-prep.ts'}</div>
+                  <div className="text-gray-400">{'// selective-entry-prep.ts'}</div>
                   <div className="h-3"></div>
                   <div>
-                    <span className="text-[#ff7b72]">const </span>
-                    <span className="text-[#e6edf3]">exam</span>
-                    <span className="text-[#8b949e]"> = </span>
-                    <span className="text-[#ff7b72]">new </span>
-                    <span className="text-[#d2a8ff]">SelectiveEntry</span>
-                    <span className="text-[#e6edf3]">()</span>
-                    <span className="text-[#8b949e]">;</span>
-                    {!heroLine1.done && <span className="inline-block w-[2px] h-4 bg-[#58a6ff] ml-0.5 animate-pulse align-middle"></span>}
+                    <span className="text-purple-600">const </span>
+                    <span className="text-gray-800">exam</span>
+                    <span className="text-gray-500"> = </span>
+                    <span className="text-purple-600">new </span>
+                    <span className="text-blue-600">SelectiveEntry</span>
+                    <span className="text-gray-800">()</span>
+                    <span className="text-gray-500">;</span>
+                    {!heroLine1.done && <span className="inline-block w-[2px] h-4 bg-blue-500 ml-0.5 animate-pulse align-middle"></span>}
                   </div>
                   <div className={`transition-opacity duration-300 ${heroLine2.displayed ? 'opacity-100' : 'opacity-0'}`}>
-                    <span className="text-[#e6edf3]">exam</span>
-                    <span className="text-[#8b949e]">.</span>
-                    <span className="text-[#d2a8ff]">prepare</span>
-                    <span className="text-[#e6edf3]">({"{"} </span>
-                    <span className="text-[#79c0ff]">state</span>
-                    <span className="text-[#8b949e]">: </span>
-                    <span className="text-[#a5d6ff]">"VIC"</span>
-                    <span className="text-[#e6edf3]"> {"}"})</span>
-                    <span className="text-[#8b949e]">;</span>
+                    <span className="text-gray-800">exam</span>
+                    <span className="text-gray-500">.</span>
+                    <span className="text-blue-600">prepare</span>
+                    <span className="text-gray-800">({"{"} </span>
+                    <span className="text-teal-600">state</span>
+                    <span className="text-gray-500">: </span>
+                    <span className="text-green-600">"VIC"</span>
+                    <span className="text-gray-800"> {"}"})</span>
+                    <span className="text-gray-500">;</span>
                   </div>
                   <div className={`transition-opacity duration-500 ${heroLine3.displayed ? 'opacity-100' : 'opacity-0'}`}>
-                    <span className="text-[#3fb950]">{heroLine3.displayed}</span>
-                    {heroLine3.displayed && !heroLine3.done && <span className="inline-block w-[2px] h-4 bg-[#58a6ff] ml-0.5 animate-pulse align-middle"></span>}
+                    <span className="text-gray-400">{heroLine3.displayed}</span>
+                    {heroLine3.displayed && !heroLine3.done && <span className="inline-block w-[2px] h-4 bg-blue-500 ml-0.5 animate-pulse align-middle"></span>}
                   </div>
                   <div className={`transition-opacity duration-300 ${heroLine4.displayed ? 'opacity-100' : 'opacity-0'}`}>
-                    <span className="text-[#e6edf3]">exam</span>
-                    <span className="text-[#8b949e]">.</span>
-                    <span className="text-[#d2a8ff]">start</span>
-                    <span className="text-[#e6edf3]">()</span>
-                    <span className="text-[#8b949e]">;</span>
-                    {heroLine4.displayed && !heroLine4.done && <span className="inline-block w-[2px] h-4 bg-[#58a6ff] ml-0.5 animate-pulse align-middle"></span>}
+                    <span className="text-gray-800">exam</span>
+                    <span className="text-gray-500">.</span>
+                    <span className="text-blue-600">start</span>
+                    <span className="text-gray-800">()</span>
+                    <span className="text-gray-500">;</span>
+                    {heroLine4.displayed && !heroLine4.done && <span className="inline-block w-[2px] h-4 bg-blue-500 ml-0.5 animate-pulse align-middle"></span>}
                   </div>
                   <div className="h-2"></div>
                   <div className={`transition-opacity duration-700 delay-300 ${heroLine4.done ? 'opacity-100' : 'opacity-0'}`}>
-                    <span className="text-[#484f58]">{'>'}</span>
-                    <span className="text-[#8b949e]"> Ready. 50 questions. 60 min timer.</span>
+                    <span className="text-gray-400">{'>'}</span>
+                    <span className="text-gray-500"> Ready. 50 questions. 60 min timer.</span>
                   </div>
                   <div className={`transition-opacity duration-700 delay-500 ${heroLine4.done ? 'opacity-100' : 'opacity-0'}`}>
-                    <span className="text-[#484f58]">{'>'}</span>
-                    <span className="text-[#3fb950]"> Exam environment locked ✓</span>
+                    <span className="text-gray-400">{'>'}</span>
+                    <span className="text-green-600"> Exam environment locked ✓</span>
                   </div>
                 </div>
               </CodeBlock>
 
-              <div className="flex gap-3 mt-4">
+              <div className="flex gap-2 mt-4">
                 {['Mathematics', 'Numerical', 'Verbal'].map((tag, i) => (
-                  <span key={i} className="px-2.5 py-1 text-[11px] font-mono text-[#8b949e] bg-[#161b22] border border-[#21262d] rounded-md">
+                  <span key={i} className="px-2.5 py-1 text-[11px] text-gray-500 bg-white border border-gray-200 rounded-md shadow-sm">
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Mobile: Mini exam preview card */}
+            {/* Mobile: Mini exam preview */}
             <div className="lg:hidden">
-              <div className="bg-[#161b22] border border-[#21262d] rounded-lg p-4 font-mono text-xs">
+              <div className="bg-white border border-gray-200 rounded-xl p-4 text-sm shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[#58a6ff] font-bold">Practice Exam</span>
-                  <span className="text-[#8b949e] flex items-center gap-1"><Clock className="w-3 h-3" /> 60:00</span>
+                  <span className="text-blue-600 font-semibold text-sm">Practice Exam</span>
+                  <span className="text-gray-400 flex items-center gap-1 text-xs"><Clock className="w-3 h-3" /> 60:00</span>
                 </div>
-                <div className="bg-[#0d1117] rounded p-3 mb-3 text-[#e6edf3] text-[11px] leading-relaxed">
+                <div className="bg-gray-50 rounded-lg p-3 mb-3 text-gray-700 text-xs leading-relaxed border border-gray-100">
                   Q12: If 3x + 7 = 22, what is the value of x?
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {['A) 3', 'B) 5', 'C) 7', 'D) 15'].map((opt, i) => (
-                    <div key={i} className={`px-3 py-2 rounded text-[11px] border ${i === 1 ? 'border-[#58a6ff] bg-[#388bfd]/10 text-[#58a6ff]' : 'border-[#21262d] text-[#484f58]'}`}>
+                    <div key={i} className={`px-3 py-2 rounded-lg text-xs border ${i === 1 ? 'border-blue-400 bg-blue-50 text-blue-600 font-semibold' : 'border-gray-200 text-gray-400'}`}>
                       {opt}
                     </div>
                   ))}
@@ -316,13 +319,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
           </div>
 
           {/* School names */}
-          <div className="mt-12 pt-6 border-t border-[#21262d]">
-            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[#484f58] text-xs font-mono">
-              <span className="text-[#30363d] mr-2">targets:</span>
+          <div className="mt-12 pt-6 border-t border-gray-100">
+            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-gray-400 text-xs">
+              <span className="text-gray-300 mr-2">targets:</span>
               {['Melbourne High', 'Mac.Robertson', 'Nossal', 'Suzanne Cory', '|', 'James Ruse', 'North Sydney Boys', '|', 'Brisbane State High', 'Perth Modern'].map((name, i) => (
                 name === '|'
-                  ? <span key={i} className="text-[#21262d]">·</span>
-                  : <span key={i} className="hover:text-[#8b949e] transition-colors cursor-default">{name}</span>
+                  ? <span key={i} className="text-gray-200">·</span>
+                  : <span key={i} className="hover:text-gray-600 transition-colors cursor-default">{name}</span>
               ))}
             </div>
           </div>
@@ -330,7 +333,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
       </section>
 
       {/* ===== STATS SECTION ===== */}
-      <section id="stats" className="py-16 bg-[#0d1117] border-t border-[#21262d]">
+      <section id="stats" className="py-16 bg-gray-50 border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -340,11 +343,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
               { value: 60, suffix: 'min', label: 'timed sessions' },
             ].map((stat, i) => (
               <Reveal key={i} delay={i * 100}>
-                <div className="text-center group">
-                  <div className="text-3xl md:text-4xl font-bold text-[#e6edf3] font-mono tracking-tight mb-1">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-gray-900 font-mono tracking-tight mb-1">
                     <Counter end={stat.value} suffix={stat.suffix} duration={1500 + i * 200} />
                   </div>
-                  <div className="text-sm text-[#484f58] font-mono">{stat.label}</div>
+                  <div className="text-sm text-gray-400">{stat.label}</div>
                 </div>
               </Reveal>
             ))}
@@ -353,15 +356,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
       </section>
 
       {/* ===== FEATURES SECTION ===== */}
-      <section id="features" className="py-24 bg-[#010409] border-t border-[#21262d]">
+      <section id="features" className="py-24 bg-white border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-6">
           <Reveal>
             <div className="mb-16">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#e6edf3] mb-3 tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 tracking-tight">
                 Built for results
               </h2>
-              <p className="text-[#484f58] text-base font-mono max-w-xl">
-                // everything you need, nothing you don't
+              <p className="text-gray-400 text-base max-w-xl">
+                Everything you need, nothing you don't.
               </p>
             </div>
           </Reveal>
@@ -375,22 +378,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
                 tag: 'core',
                 items: ['Expert-curated content', 'Covers all exam categories', 'Detailed solutions'],
                 visual: (
-                  <div className="mb-4 bg-[#161b22] rounded-lg p-3 border border-[#21262d]">
-                    <div className="flex gap-2 mb-2">
+                  <div className="mb-5 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <div className="flex gap-2 mb-3">
                       {['Math', 'Numerical', 'Verbal'].map((c, i) => (
-                        <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-[#21262d] text-[#8b949e] font-mono">{c}</span>
+                        <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-500 shadow-sm">{c}</span>
                       ))}
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {[
-                        { topic: 'Algebra', w: '78%', color: 'bg-[#58a6ff]' },
-                        { topic: 'Geometry', w: '65%', color: 'bg-[#d2a8ff]' },
-                        { topic: 'Patterns', w: '52%', color: 'bg-[#3fb950]' },
+                        { topic: 'Algebra', w: '78%', color: 'bg-blue-500' },
+                        { topic: 'Geometry', w: '65%', color: 'bg-purple-500' },
+                        { topic: 'Patterns', w: '52%', color: 'bg-green-500' },
                       ].map((row, i) => (
-                        <div key={i} className="flex items-center gap-2 text-[10px] font-mono text-[#484f58]">
+                        <div key={i} className="flex items-center gap-2 text-[10px] text-gray-400">
                           <span className="w-14 text-right">{row.topic}</span>
-                          <div className="flex-1 bg-[#0d1117] rounded-full h-1.5 overflow-hidden">
-                            <div className={`${row.color} h-full rounded-full transition-all duration-1000`} style={{ width: row.w }}></div>
+                          <div className="flex-1 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                            <div className={`${row.color} h-full rounded-full`} style={{ width: row.w }}></div>
                           </div>
                         </div>
                       ))}
@@ -405,20 +408,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
                 tag: 'runtime',
                 items: ['Secure browser mode', 'Auto-submit on timeout', 'Question flagging'],
                 visual: (
-                  <div className="mb-4 bg-[#161b22] rounded-lg p-3 border border-[#21262d]">
+                  <div className="mb-5 bg-gray-50 rounded-xl p-3 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-mono text-[#e6edf3] font-bold">Q23 / 50</span>
-                      <span className="text-[10px] font-mono text-[#f85149] flex items-center gap-1"><Clock className="w-3 h-3" /> 42:17</span>
+                      <span className="text-[10px] font-semibold text-gray-700">Q23 / 50</span>
+                      <span className="text-[10px] text-red-500 flex items-center gap-1 font-medium"><Clock className="w-3 h-3" /> 42:17</span>
                     </div>
-                    <div className="w-full bg-[#0d1117] rounded-full h-1 mb-2 overflow-hidden">
-                      <div className="bg-[#58a6ff] h-full rounded-full" style={{ width: '46%' }}></div>
+                    <div className="w-full bg-gray-200 rounded-full h-1 mb-2.5 overflow-hidden">
+                      <div className="bg-blue-500 h-full rounded-full" style={{ width: '46%' }}></div>
                     </div>
                     <div className="grid grid-cols-8 gap-1">
                       {Array.from({ length: 16 }).map((_, i) => (
-                        <div key={i} className={`aspect-square rounded text-[7px] flex items-center justify-center font-mono ${
-                          i < 10 ? 'bg-[#388bfd]/15 text-[#58a6ff]' :
-                          i === 10 ? 'bg-[#58a6ff] text-white ring-1 ring-[#58a6ff]/40' :
-                          'bg-[#0d1117] text-[#30363d]'
+                        <div key={i} className={`aspect-square rounded text-[7px] flex items-center justify-center font-semibold ${
+                          i < 10 ? 'bg-blue-100 text-blue-600' :
+                          i === 10 ? 'bg-gray-900 text-white ring-1 ring-gray-900/20' :
+                          'bg-gray-100 text-gray-400'
                         }`}>{i + 1}</div>
                       ))}
                     </div>
@@ -432,15 +435,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
                 tag: 'output',
                 items: ['Score breakdown', 'Topic-level insights', 'Historical trends'],
                 visual: (
-                  <div className="mb-4 bg-[#161b22] rounded-lg p-3 border border-[#21262d]">
+                  <div className="mb-5 bg-gray-50 rounded-xl p-3 border border-gray-100">
                     <div className="flex items-end gap-1.5 h-12 mb-2">
                       {[35, 42, 55, 48, 62, 70, 68, 78, 82, 88].map((h, i) => (
-                        <div key={i} className="flex-1 rounded-sm bg-gradient-to-t from-[#58a6ff] to-[#d2a8ff]" style={{ height: `${h}%`, opacity: 0.3 + (i / 10) * 0.7 }}></div>
+                        <div key={i} className="flex-1 rounded-sm bg-gradient-to-t from-blue-500 to-purple-400" style={{ height: `${h}%`, opacity: 0.3 + (i / 10) * 0.7 }}></div>
                       ))}
                     </div>
-                    <div className="flex justify-between text-[9px] font-mono text-[#484f58]">
+                    <div className="flex justify-between text-[9px] text-gray-400">
                       <span>Test 1</span>
-                      <span className="text-[#3fb950] font-bold flex items-center gap-0.5"><TrendingUp className="w-2.5 h-2.5" /> +24%</span>
+                      <span className="text-green-600 font-semibold flex items-center gap-0.5"><TrendingUp className="w-2.5 h-2.5" /> +24%</span>
                       <span>Test 10</span>
                     </div>
                   </div>
@@ -448,22 +451,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
               }
             ].map((feature, idx) => (
               <Reveal key={idx} delay={idx * 150}>
-                <div className="group p-6 rounded-xl bg-[#0d1117] border border-[#21262d] hover:border-[#30363d] transition-all duration-300 hover:-translate-y-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-md bg-[#161b22] border border-[#21262d] flex items-center justify-center text-[#58a6ff] group-hover:border-[#58a6ff]/30 group-hover:shadow-[0_0_8px_rgba(88,166,255,0.1)] transition-all">
+                <div className="group p-6 rounded-2xl bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-9 h-9 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-blue-600 transition-all">
                       {feature.icon}
                     </div>
-                    <span className="text-[10px] font-mono text-[#484f58] bg-[#161b22] px-2 py-0.5 rounded border border-[#21262d]">{feature.tag}</span>
+                    <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{feature.tag}</span>
                   </div>
 
                   {feature.visual}
 
-                  <h3 className="text-lg font-semibold text-[#e6edf3] mb-2">{feature.title}</h3>
-                  <p className="text-[#8b949e] text-sm leading-relaxed mb-5">{feature.desc}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-5">{feature.desc}</p>
                   <ul className="space-y-2">
                     {feature.items.map((item, i) => (
-                      <li key={i} className="flex items-center gap-2 text-xs text-[#484f58] font-mono">
-                        <Check className="w-3 h-3 text-[#3fb950]" />
+                      <li key={i} className="flex items-center gap-2 text-xs text-gray-400">
+                        <Check className="w-3 h-3 text-green-500" />
                         {item}
                       </li>
                     ))}
@@ -475,15 +478,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
         </div>
       </section>
 
-      {/* ===== SOCIAL PROOF / TESTIMONIALS ===== */}
-      <section className="py-20 bg-[#0d1117] border-t border-[#21262d]">
+      {/* ===== TESTIMONIALS ===== */}
+      <section className="py-20 bg-gray-50 border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-6">
           <Reveal>
             <div className="mb-12 text-center">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#e6edf3] mb-3 tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 tracking-tight">
                 Students trust eipi
               </h2>
-              <p className="text-[#484f58] text-sm font-mono">// what our users say</p>
+              <p className="text-gray-400 text-sm">What our users say</p>
             </div>
           </Reveal>
 
@@ -509,22 +512,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
               }
             ].map((t, idx) => (
               <Reveal key={idx} delay={idx * 150}>
-                <div className="bg-[#161b22] border border-[#21262d] rounded-xl p-6 hover:border-[#30363d] transition-all group">
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-sm transition-all">
                   <div className="flex gap-0.5 mb-4">
                     {Array.from({ length: t.stars }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-[#d29922] fill-[#d29922]" />
+                      <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
                     ))}
                   </div>
-                  <p className="text-[#8b949e] text-sm leading-relaxed mb-6 italic">
+                  <p className="text-gray-500 text-sm leading-relaxed mb-6">
                     "{t.quote}"
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#21262d] text-[#58a6ff] flex items-center justify-center font-bold text-xs">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 text-blue-600 flex items-center justify-center font-semibold text-xs">
                       {t.name[0]}
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-[#e6edf3]">{t.name}</div>
-                      <div className="text-xs text-[#3fb950] font-mono">{t.detail}</div>
+                      <div className="text-sm font-semibold text-gray-900">{t.name}</div>
+                      <div className="text-xs text-green-600 font-medium">{t.detail}</div>
                     </div>
                   </div>
                 </div>
@@ -534,32 +537,32 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
         </div>
       </section>
 
-      {/* ===== PRICING / FREEMIUM TRANSPARENCY ===== */}
-      <section id="pricing" className="py-24 bg-[#010409] border-t border-[#21262d]">
+      {/* ===== PRICING ===== */}
+      <section id="pricing" className="py-24 bg-white border-t border-gray-200">
         <div className="max-w-4xl mx-auto px-6">
           <Reveal>
             <div className="text-center mb-14">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#e6edf3] mb-3 tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 tracking-tight">
                 Simple, transparent pricing
               </h2>
-              <p className="text-[#484f58] text-sm font-mono">// start for free, upgrade when ready</p>
+              <p className="text-gray-400 text-sm">Start for free, upgrade when ready</p>
             </div>
           </Reveal>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <Reveal delay={0}>
-              <div className="bg-[#0d1117] border border-[#21262d] rounded-xl p-8 hover:border-[#30363d] transition-all">
+              <div className="bg-white border border-gray-200 rounded-2xl p-8 hover:border-gray-300 hover:shadow-sm transition-all h-full flex flex-col">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-lg bg-[#161b22] border border-[#21262d] flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-[#8b949e]" />
+                  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-gray-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-[#e6edf3]">Free</h3>
-                    <p className="text-xs text-[#484f58] font-mono">$0 / forever</p>
+                    <h3 className="text-lg font-semibold text-gray-900">Free</h3>
+                    <p className="text-xs text-gray-400">$0 / forever</p>
                   </div>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-8 flex-1">
                   {[
                     'Full question bank (1,150+ questions)',
                     'Timed exam simulations',
@@ -567,8 +570,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
                     'Partial mistake review (first 5)',
                     'Session history'
                   ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#8b949e]">
-                      <Check className="w-4 h-4 text-[#3fb950] shrink-0 mt-0.5" />
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
                       {item}
                     </li>
                   ))}
@@ -576,7 +579,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
 
                 <button
                   onClick={() => onLoginClick('student')}
-                  className="w-full py-3 border border-[#30363d] rounded-lg text-[#e6edf3] font-medium hover:bg-[#161b22] transition-colors text-sm"
+                  className="w-full py-3 border border-gray-300 rounded-xl text-gray-900 font-medium hover:bg-gray-50 transition-colors text-sm"
                 >
                   Get started free
                 </button>
@@ -584,22 +587,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
             </Reveal>
 
             <Reveal delay={150}>
-              <div className="bg-[#0d1117] border-2 border-[#58a6ff]/40 rounded-xl p-8 relative overflow-hidden hover:border-[#58a6ff]/60 transition-all">
-                <div className="absolute top-0 right-0 px-3 py-1 bg-[#58a6ff] text-[#0d1117] text-[10px] font-mono font-bold rounded-bl-lg">
+              <div className="bg-gray-900 border border-gray-900 rounded-2xl p-8 relative overflow-hidden h-full flex flex-col">
+                <div className="absolute top-0 right-0 px-3 py-1 bg-blue-500 text-white text-[10px] font-semibold rounded-bl-xl">
                   COMING SOON
                 </div>
 
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-lg bg-[#1f6feb]/10 border border-[#1f6feb]/30 flex items-center justify-center">
-                    <Crown className="w-5 h-5 text-[#58a6ff]" />
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                    <Crown className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-[#e6edf3]">Premium</h3>
-                    <p className="text-xs text-[#484f58] font-mono">pricing TBA</p>
+                    <h3 className="text-lg font-semibold text-white">Premium</h3>
+                    <p className="text-xs text-gray-400">pricing TBA</p>
                   </div>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-8 flex-1">
                   {[
                     'Everything in Free',
                     'Unlimited mistake review & explanations',
@@ -607,8 +610,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
                     'Performance trends over time',
                     'Priority question bank updates'
                   ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#8b949e]">
-                      <Check className="w-4 h-4 text-[#58a6ff] shrink-0 mt-0.5" />
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-gray-300">
+                      <Check className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                       {item}
                     </li>
                   ))}
@@ -616,7 +619,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
 
                 <button
                   disabled
-                  className="w-full py-3 bg-[#21262d] border border-[#30363d] rounded-lg text-[#484f58] font-medium text-sm cursor-not-allowed"
+                  className="w-full py-3 bg-white/10 border border-white/20 rounded-xl text-gray-400 font-medium text-sm cursor-not-allowed"
                 >
                   Notify me
                 </button>
@@ -627,15 +630,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
       </section>
 
       {/* ===== HOW IT WORKS ===== */}
-      <section className="py-24 bg-[#0d1117] border-t border-[#21262d]">
+      <section className="py-24 bg-gray-50 border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-6">
           <Reveal>
             <div className="mb-16">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#e6edf3] mb-3 tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 tracking-tight">
                 How it works
               </h2>
-              <p className="text-[#484f58] text-base font-mono">
-                // three steps to exam-ready
+              <p className="text-gray-400 text-base">
+                Three steps to exam-ready.
               </p>
             </div>
           </Reveal>
@@ -663,13 +666,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
             ].map((item, i) => (
               <Reveal key={i} delay={i * 150}>
                 <div className="relative group">
-                  <div className="text-6xl font-bold text-[#161b22] font-mono absolute -top-2 -left-1 select-none group-hover:text-[#1c2128] transition-colors">{item.step}</div>
+                  <div className="text-6xl font-bold text-gray-100 font-mono absolute -top-2 -left-1 select-none group-hover:text-gray-200 transition-colors">{item.step}</div>
                   <div className="relative pt-12 pl-1">
-                    <div className="w-9 h-9 rounded-md bg-[#161b22] border border-[#21262d] flex items-center justify-center text-[#58a6ff] mb-4 group-hover:border-[#58a6ff]/30 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-blue-600 mb-4 shadow-sm group-hover:border-blue-200 transition-colors">
                       {item.icon}
                     </div>
-                    <h3 className="text-lg font-semibold text-[#e6edf3] mb-2">{item.title}</h3>
-                    <p className="text-[#8b949e] text-sm leading-relaxed">{item.desc}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               </Reveal>
@@ -679,43 +682,43 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
       </section>
 
       {/* ===== CTA SECTION ===== */}
-      <section className="py-20 bg-[#010409] border-t border-[#21262d]">
+      <section className="py-20 bg-white border-t border-gray-200">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <Reveal>
             <CodeBlock className="mb-10 text-left max-w-md mx-auto" title="your-future.ts">
               <div className="space-y-1.5 text-[13px]">
-                <div className="text-[#484f58]">{'// your-future.ts'}</div>
+                <div className="text-gray-400">{'// your-future.ts'}</div>
                 <div>
-                  <span className="text-[#ff7b72]">if </span>
-                  <span className="text-[#e6edf3]">(</span>
-                  <span className="text-[#79c0ff]">ready</span>
-                  <span className="text-[#e6edf3]">) {'{'}</span>
+                  <span className="text-purple-600">if </span>
+                  <span className="text-gray-800">(</span>
+                  <span className="text-teal-600">ready</span>
+                  <span className="text-gray-800">) {'{'}</span>
                 </div>
                 <div className="pl-4">
-                  <span className="text-[#e6edf3]">eipi</span>
-                  <span className="text-[#8b949e]">.</span>
-                  <span className="text-[#d2a8ff]">beginPreparation</span>
-                  <span className="text-[#e6edf3]">()</span>
-                  <span className="text-[#8b949e]">;</span>
+                  <span className="text-gray-800">eipi</span>
+                  <span className="text-gray-500">.</span>
+                  <span className="text-blue-600">beginPreparation</span>
+                  <span className="text-gray-800">()</span>
+                  <span className="text-gray-500">;</span>
                 </div>
                 <div>
-                  <span className="text-[#e6edf3]">{'}'}</span>
+                  <span className="text-gray-800">{'}'}</span>
                 </div>
               </div>
             </CodeBlock>
 
-            <h2 className="text-2xl md:text-3xl font-bold text-[#e6edf3] mb-4 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 tracking-tight">
               Ready to start?
             </h2>
-            <p className="text-[#8b949e] mb-8 max-w-md mx-auto">
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">
               Free access to the full question bank. No payment required.
             </p>
             <button
               onClick={() => onLoginClick('student')}
-              className="group px-8 py-4 bg-[#1f6feb] hover:bg-[#388bfd] text-white rounded-lg font-medium text-lg transition-all shadow-lg shadow-[#1f6feb]/20 hover:shadow-[#1f6feb]/30 flex items-center justify-center gap-3 mx-auto"
+              className="group px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-medium text-lg transition-all shadow-sm flex items-center justify-center gap-3 mx-auto"
             >
               <Mail className="w-5 h-5" />
-              Get started
+              Get started free
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </button>
           </Reveal>
@@ -723,46 +726,46 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-[#010409] border-t border-[#21262d] py-12">
+      <footer className="bg-gray-50 border-t border-gray-200 py-12">
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-10 mb-10">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 bg-[#161b22] border border-[#30363d] text-[#e6edf3] rounded flex items-center justify-center font-serif italic font-bold text-sm">
-                   e<sup className="text-[8px] not-italic -mt-1 text-[#58a6ff]">iπ</sup>
+                <div className="w-7 h-7 bg-gray-900 text-white rounded-md flex items-center justify-center font-serif italic font-bold text-sm">
+                   e<sup className="text-[8px] not-italic -mt-1">iπ</sup>
                 </div>
-                <span className="font-mono text-sm text-[#8b949e]">eipi</span>
+                <span className="font-semibold text-gray-700 text-sm">eipi</span>
               </div>
-              <p className="text-[#484f58] text-xs font-mono max-w-xs leading-relaxed">
+              <p className="text-gray-400 text-xs max-w-xs leading-relaxed">
                 Selective school exam preparation for Australian students. Built with care.
               </p>
             </div>
 
             <div className="flex gap-16">
               <div>
-                <h4 className="text-xs font-mono text-[#8b949e] uppercase tracking-wider mb-3">Platform</h4>
-                <ul className="space-y-2 text-sm font-mono">
-                  <li><a href="#features" className="text-[#484f58] hover:text-[#58a6ff] transition-colors">Features</a></li>
-                  <li><a href="#pricing" className="text-[#484f58] hover:text-[#58a6ff] transition-colors">Pricing</a></li>
-                  <li><a href="#stats" className="text-[#484f58] hover:text-[#58a6ff] transition-colors">Question Bank</a></li>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Platform</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="#features" className="text-gray-400 hover:text-blue-600 transition-colors">Features</a></li>
+                  <li><a href="#pricing" className="text-gray-400 hover:text-blue-600 transition-colors">Pricing</a></li>
+                  <li><a href="#stats" className="text-gray-400 hover:text-blue-600 transition-colors">Question Bank</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="text-xs font-mono text-[#8b949e] uppercase tracking-wider mb-3">Legal</h4>
-                <ul className="space-y-2 text-sm font-mono">
-                  <li><a href="#" className="text-[#484f58] hover:text-[#58a6ff] transition-colors">Privacy</a></li>
-                  <li><a href="#" className="text-[#484f58] hover:text-[#58a6ff] transition-colors">Terms</a></li>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Legal</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">Privacy</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">Terms</a></li>
                 </ul>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-[#21262d] pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
-            <div className="text-[#30363d] text-xs font-mono">
-              © 2026 eipi education. all rights reserved.
+          <div className="border-t border-gray-200 pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div className="text-gray-400 text-xs">
+              © 2026 eipi education. All rights reserved.
             </div>
-            <button onClick={() => onLoginClick('teacher')} className="flex items-center gap-1.5 text-xs font-mono text-[#30363d] hover:text-[#58a6ff] transition-colors">
-              <Lock className="w-3 h-3" /> staff_access
+            <button onClick={() => onLoginClick('teacher')} className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-blue-600 transition-colors">
+              <Lock className="w-3 h-3" /> Staff access
             </button>
           </div>
         </div>
