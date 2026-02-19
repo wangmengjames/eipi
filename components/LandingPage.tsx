@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Lock, ChevronRight, Terminal, ArrowRight, Check, Clock, Shield, BarChart3, Menu, X, Star, Zap, BookOpen, TrendingUp, Crown, ChevronDown } from 'lucide-react';
+import { Mail, Lock, ChevronRight, Terminal, ArrowRight, Check, Clock, Shield, BarChart3, Menu, X, Star, Zap, BookOpen, TrendingUp, Crown } from 'lucide-react';
 
 interface LandingPageProps {
   onLoginClick: (target: 'student' | 'teacher') => void;

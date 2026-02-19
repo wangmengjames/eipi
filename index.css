@@ -23,29 +23,29 @@ body {
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace !important;
 }
 
-/* Custom scrollbar (dark theme) */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d1117;
+  background: #f9fafb;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #21262d;
+  background: #d1d5db;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #30363d;
+  background: #9ca3af;
 }
 
 /* Selection color */
 ::selection {
-  background: rgba(88, 166, 255, 0.2);
-  color: #e6edf3;
+  background: rgba(59, 130, 246, 0.15);
+  color: #111827;
 }
 
 /* Cursor blink for code blocks */

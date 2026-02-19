@@ -13,6 +13,7 @@ interface StudentPortalProps {
 type ExamState = 'intro' | 'active' | 'result';
 
 interface ExamResult {
+  email: string;
   date: string;
   score: number;
   total: number;
@@ -123,7 +124,12 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
          alert("The question bank is empty. Please ask your teacher to upload questions.");
          return;
       }
-      const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+      // Fisher-Yates shuffle for uniform distribution
+      const shuffled = [...allQuestions];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
       const selected = shuffled.slice(0, 50);
       setQuestions(selected);
       setAnswers({});
@@ -152,6 +158,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
       if (isCorrect) topicStats[topic].correct++;
     });
     return {
+      email: user?.email || 'anonymous',
       date: new Date().toISOString(),
       score: correct,
       total: questions.length,
