@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Clock, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Flag, Award, BookOpen, LogOut, Lock, Trophy, BarChart3, EyeOff, XCircle, X, ArrowLeft, Loader2, Crown, Star, User } from 'lucide-react';
 import { Question, UserProfile } from '../types';
 import LatexRenderer from './LatexRenderer';
@@ -41,6 +41,14 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
 
   const [history, setHistory] = useState<ExamResult[]>([]);
 
+  // Refs to keep latest values accessible in timer callback
+  const historyRef = useRef(history);
+  historyRef.current = history;
+  const questionsRef = useRef(questions);
+  questionsRef.current = questions;
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
+
   useEffect(() => {
     const initData = async () => {
         setIsSyncing(true);
@@ -72,7 +80,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
         }
 
         try {
-            const savedHistory = await dbService.loadHistory();
+            const savedHistory = await dbService.loadHistory(user?.email);
             if (savedHistory && Array.isArray(savedHistory)) {
                 setHistory(savedHistory);
             }
@@ -81,7 +89,11 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
         setIsSyncing(false);
     };
     initData();
+  }, []);
 
+  // Disable right-click and text selection only during active exam
+  useEffect(() => {
+    if (examState !== 'active') return;
     const preventDefault = (e: Event) => e.preventDefault();
     document.addEventListener('contextmenu', preventDefault);
     document.addEventListener('selectstart', preventDefault);
@@ -89,7 +101,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
       document.removeEventListener('contextmenu', preventDefault);
       document.removeEventListener('selectstart', preventDefault);
     };
-  }, []);
+  }, [examState]);
 
   useEffect(() => {
     if (examState !== 'active') return;
@@ -102,13 +114,15 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
     return () => window.removeEventListener('blur', handleBlur);
   }, [examState, showSubmitModal, isSubmitting]);
 
+  const [timedOut, setTimedOut] = useState(false);
+
   useEffect(() => {
     if (examState !== 'active' || isSubmitting) return;
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          performSubmit(true);
+          setTimedOut(true);
           return 0;
         }
         return prev - 1;
@@ -116,6 +130,14 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
     }, 1000);
     return () => clearInterval(timer);
   }, [examState, isSubmitting]);
+
+  // Auto-submit when timer reaches zero (separate from state updater)
+  useEffect(() => {
+    if (timedOut) {
+      setTimedOut(false);
+      performSubmit(true);
+    }
+  }, [timedOut]);
 
   const startExam = async () => {
     try {
@@ -146,11 +168,13 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
     }
   };
 
-  const calculateResults = (): ExamResult => {
+  const calculateResults = useCallback((): ExamResult => {
+    const currentQuestions = questionsRef.current;
+    const currentAnswers = answersRef.current;
     let correct = 0;
     const topicStats: Record<string, { total: number, correct: number }> = {};
-    questions.forEach(q => {
-      const isCorrect = answers[q.id] === q.correctAnswerIndex;
+    currentQuestions.forEach(q => {
+      const isCorrect = currentAnswers[q.id] === q.correctAnswerIndex;
       if (isCorrect) correct++;
       const topic = q.topic || 'General';
       if (!topicStats[topic]) topicStats[topic] = { total: 0, correct: 0 };
@@ -161,23 +185,24 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
       email: user?.email || 'anonymous',
       date: new Date().toISOString(),
       score: correct,
-      total: questions.length,
-      percentage: questions.length > 0 ? Math.round((correct / questions.length) * 100) : 0,
+      total: currentQuestions.length,
+      percentage: currentQuestions.length > 0 ? Math.round((correct / currentQuestions.length) * 100) : 0,
       topicStats
     };
-  };
+  }, [user?.email]);
 
   const handleRequestSubmit = () => { setShowSubmitModal(true); };
 
-  const performSubmit = async (auto = false) => {
+  const performSubmit = useCallback(async (auto = false) => {
     setIsSubmitting(true);
     setShowSubmitModal(false);
     try {
         await new Promise(r => setTimeout(r, 500));
         const result = calculateResults();
-        const newHistory = [result, ...history];
+        const currentHistory = historyRef.current;
+        const newHistory = [result, ...currentHistory];
         setHistory(newHistory);
-        try { await dbService.saveHistory(newHistory); } catch (dbError) { console.error("Failed to save history", dbError); }
+        try { await dbService.saveHistory(newHistory, user?.email); } catch (dbError) { console.error("Failed to save history", dbError); }
         setExamState('result');
         setReviewMode(false);
     } catch (error) {
@@ -185,7 +210,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
         alert("An error occurred during submission.");
         setIsSubmitting(false);
     }
-  };
+  }, [calculateResults]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

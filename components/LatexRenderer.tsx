@@ -6,18 +6,6 @@ interface LatexRendererProps {
   className?: string;
 }
 
-const sanitizeHTML = (html: string): string => {
-  const div = document.createElement('div');
-  div.textContent = html;
-  const sanitized = div.innerHTML;
-  // Restore LaTeX delimiters that textContent would escape
-  return sanitized
-    .replace(/&lt;/g, (_, offset, str) => {
-      // Only restore < that are part of known safe HTML tags used by MathJax output
-      return '&lt;';
-    });
-};
-
 const LatexRenderer: React.FC<LatexRendererProps> = React.memo(({ text, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 

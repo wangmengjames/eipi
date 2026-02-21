@@ -14,9 +14,10 @@ const useTypingEffect = (text: string, speed: number = 40, startDelay: number = 
 
   useEffect(() => {
     if (hasPlayed) return;
+    let interval: ReturnType<typeof setInterval>;
     const delayTimer = setTimeout(() => {
       let i = 0;
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         i++;
         setDisplayed(text.slice(0, i));
         if (i >= text.length) {
@@ -24,10 +25,12 @@ const useTypingEffect = (text: string, speed: number = 40, startDelay: number = 
           setDone(true);
         }
       }, speed);
-      return () => clearInterval(interval);
     }, startDelay);
-    return () => clearTimeout(delayTimer);
-  }, []);
+    return () => {
+      clearTimeout(delayTimer);
+      if (interval) clearInterval(interval);
+    };
+  }, [text, speed, startDelay, hasPlayed]);
 
   return { displayed, done };
 };

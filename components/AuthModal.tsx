@@ -11,6 +11,17 @@ interface AuthModalProps {
   onLoginSuccess: (user: UserProfile | null, target: 'student' | 'teacher') => void;
 }
 
+const hashPassword = async (password: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').toLowerCase();
+const ADMIN_PASSWORD_HASH = import.meta.env.VITE_ADMIN_PASSWORD_HASH || '';
+
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginSuccess }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -73,16 +84,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
   }, [lockoutUntil]);
 
   // --- TEACHER LOGIN ---
-  const handleTeacherLogin = (e: React.FormEvent) => {
+  const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (lockoutUntil) return;
 
-    if (adminEmailInput.toLowerCase() !== 'wangmengjames@gmail.com') {
+    if (adminEmailInput.toLowerCase() !== ADMIN_EMAIL) {
         setAuthError('Unauthorized email address.');
         return;
     }
 
-    if (adminPasswordInput === '0115') {
+    const inputHash = await hashPassword(adminPasswordInput);
+    if (inputHash === ADMIN_PASSWORD_HASH) {
       performLoginSuccess(null, 'teacher');
     } else {
       const newAttempts = failedAttempts + 1;
@@ -142,8 +154,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
       setAuthError('');
       try {
           const user = await dbService.loadUserProfile(studentEmail);
-          if (user && user.password === passwordInput) {
-              performLoginSuccess(user, 'student');
+          if (user && user.password) {
+              const inputHash = await hashPassword(passwordInput);
+              if (inputHash === user.password) {
+                  performLoginSuccess(user, 'student');
+              } else {
+                  setAuthError("Incorrect password.");
+                  setIsLoggingIn(false);
+              }
           } else {
               setAuthError("Incorrect password.");
               setIsLoggingIn(false);
@@ -183,9 +201,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
           return;
       }
       setIsLoggingIn(true);
+      const hashedPwd = await hashPassword(regData.password);
       const newProfile: UserProfile = {
           email: studentEmail,
           ...regData,
+          password: hashedPwd,
           pictureUrl: undefined,
           joinedAt: new Date().toISOString()
       };

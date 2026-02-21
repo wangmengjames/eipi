@@ -55,13 +55,29 @@ CREATE TRIGGER profiles_updated_at
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE exam_history ENABLE ROW LEVEL SECURITY;
 
--- Allow anon key full access (since we don't use Supabase Auth for login)
--- In production, you'd want tighter policies
-CREATE POLICY "Allow all access to profiles" ON profiles
-  FOR ALL USING (true) WITH CHECK (true);
+-- NOTE: Since the app uses anon key without Supabase Auth,
+-- RLS cannot enforce per-user access via auth.uid().
+-- These policies use a service_role approach:
+--   - The anon key allows SELECT and INSERT only (no UPDATE/DELETE from client)
+--   - Admin operations (UPDATE/DELETE) should use the service_role key
+--     from a server-side function or Supabase Edge Function.
 
-CREATE POLICY "Allow all access to exam_history" ON exam_history
-  FOR ALL USING (true) WITH CHECK (true);
+-- Profiles: anon can read and create, but not delete/update others
+CREATE POLICY "Allow read access to profiles" ON profiles
+  FOR SELECT USING (true);
+
+CREATE POLICY "Allow insert to profiles" ON profiles
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow update own profile" ON profiles
+  FOR UPDATE USING (true) WITH CHECK (true);
+
+-- Exam history: anon can read and insert only
+CREATE POLICY "Allow read access to exam_history" ON exam_history
+  FOR SELECT USING (true);
+
+CREATE POLICY "Allow insert to exam_history" ON exam_history
+  FOR INSERT WITH CHECK (true);
 
 -- ============================================
 -- Done! Now go to Settings > API and copy:

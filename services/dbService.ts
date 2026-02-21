@@ -15,7 +15,10 @@ const STORES = {
   USERS: 'users'
 };
 
+let cachedDb: IDBDatabase | null = null;
+
 const openDB = (): Promise<IDBDatabase> => {
+  if (cachedDb) return Promise.resolve(cachedDb);
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = (event) => {
@@ -25,7 +28,11 @@ const openDB = (): Promise<IDBDatabase> => {
       if (!db.objectStoreNames.contains(STORES.HISTORY)) db.createObjectStore(STORES.HISTORY);
       if (!db.objectStoreNames.contains(STORES.USERS)) db.createObjectStore(STORES.USERS, { keyPath: 'email' });
     };
-    request.onsuccess = (event) => resolve((event.target as IDBOpenDBRequest).result);
+    request.onsuccess = (event) => {
+      cachedDb = (event.target as IDBOpenDBRequest).result;
+      cachedDb.onclose = () => { cachedDb = null; };
+      resolve(cachedDb);
+    };
     request.onerror = (event) => reject((event.target as IDBOpenDBRequest).error);
   });
 };
@@ -186,9 +193,9 @@ export const dbService = {
   },
 
   // --- Exam History ---
-  saveHistory: async (history: any[]): Promise<void> => {
-    // Always save full history to IDB
-    await idbSave(STORES.HISTORY, history, 'main');
+  saveHistory: async (history: any[], userEmail?: string): Promise<void> => {
+    const key = userEmail || 'anonymous';
+    await idbSave(STORES.HISTORY, history, key);
 
     // Sync latest result to Supabase
     if (isSupabaseConfigured() && supabase && history.length > 0) {
@@ -208,9 +215,8 @@ export const dbService = {
     }
   },
 
-  loadHistory: async (): Promise<any[]> => {
-    // History is stored locally for now (per-device)
-    // Could be extended to load from Supabase by user email
-    return idbLoad(STORES.HISTORY, 'main');
+  loadHistory: async (userEmail?: string): Promise<any[]> => {
+    const key = userEmail || 'anonymous';
+    return idbLoad(STORES.HISTORY, key);
   },
 };
