@@ -1,14 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
-import { X, User, School, Mail, ShieldCheck, KeyRound, Clock, AlertCircle, Loader2, ArrowRight, Check, Lock } from 'lucide-react';
+import { X, User, School, Mail, ShieldCheck, KeyRound, Clock, AlertCircle, Loader2, ArrowRight, Lock } from 'lucide-react';
 import { UserProfile } from '../types';
 import { dbService } from '../services/dbService';
+import { auth } from '../services/firebaseClient';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   target: 'student' | 'teacher';
-  onLoginSuccess: (user: UserProfile | null, target: 'student' | 'teacher') => void;
+  onLoginSuccess: (user: UserProfile | null, target: 'student' | 'teacher', uid?: string) => void;
 }
 
 const hashPassword = async (password: string): Promise<string> => {
@@ -31,12 +32,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
-  // Student Auth State
-  const [studentStep, setStudentStep] = useState<'email' | 'password' | 'verify' | 'register'>('email');
+  // Student Auth State — simplified to 2 steps: login → register
+  const [studentStep, setStudentStep] = useState<'login' | 'register'>('login');
   const [studentEmail, setStudentEmail] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
-  const [verifyCodeInput, setVerifyCodeInput] = useState('');
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [authError, setAuthError] = useState('');
   const [timeRemaining, setTimeRemaining] = useState(0);
 
@@ -57,9 +56,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
         setAdminEmailInput('');
         setStudentEmail('');
         setPasswordInput('');
-        setVerifyCodeInput('');
-        setGeneratedCode(null);
-        setStudentStep('email');
+        setStudentStep('login');
         setIsLoggingIn(false);
         setRegData({ realName: '', username: '', yearLevel: '', school: '', referralSource: '', password: '' });
     }
@@ -95,6 +92,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
 
     const inputHash = await hashPassword(adminPasswordInput);
     if (inputHash === ADMIN_PASSWORD_HASH) {
+      // Also sign into Firebase to get Firestore access
+      if (auth) {
+        try {
+          await signInWithEmailAndPassword(auth, adminEmailInput.toLowerCase(), adminPasswordInput);
+        } catch (e) {
+          console.warn('[Firebase] Teacher Firebase sign-in failed, continuing with env var auth', e);
+        }
+      }
       performLoginSuccess(null, 'teacher');
     } else {
       const newAttempts = failedAttempts + 1;
@@ -111,120 +116,95 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
     }
   };
 
-  // --- STUDENT LOGIN ---
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setAuthError('');
-      if (!studentEmail || !studentEmail.includes('@')) {
-          setAuthError('Please enter a valid email address.');
-          return;
+  // --- STUDENT LOGIN (Firebase Auth) ---
+  const handleStudentLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+
+    if (!studentEmail || !studentEmail.includes('@')) {
+      setAuthError('Please enter a valid email address.');
+      return;
+    }
+    if (!passwordInput) {
+      setAuthError('Please enter your password.');
+      return;
+    }
+    if (!auth) {
+      setAuthError('Authentication service not configured.');
+      return;
+    }
+
+    setIsLoggingIn(true);
+    try {
+      const credential = await signInWithEmailAndPassword(auth, studentEmail, passwordInput);
+      const uid = credential.user.uid;
+      const profile = await dbService.loadUserProfile(uid);
+      performLoginSuccess(profile, 'student', uid);
+    } catch (err: any) {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        // User doesn't exist — prompt registration
+        setRegData(prev => ({ ...prev, password: passwordInput }));
+        setStudentStep('register');
+      } else if (err.code === 'auth/wrong-password') {
+        setAuthError('Incorrect password.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setAuthError('Too many attempts. Please try again later.');
+      } else {
+        setAuthError('Login failed. Please try again.');
       }
-      setIsLoggingIn(true);
-      try {
-          const existingUser = await dbService.loadUserProfile(studentEmail);
-          if (existingUser && existingUser.password) {
-              setStudentStep('password');
-          } else {
-              await sendVerificationCode();
-              setStudentStep('verify');
-          }
-      } catch (e) {
-          setAuthError("Network error. Using offline mode?");
-          await sendVerificationCode();
-          setStudentStep('verify');
-      } finally {
-          setIsLoggingIn(false);
-      }
+      setIsLoggingIn(false);
+    }
   };
 
-  const sendVerificationCode = async () => {
-      return new Promise<void>(resolve => {
-          setTimeout(() => {
-              const code = Math.floor(100000 + Math.random() * 900000).toString();
-              setGeneratedCode(code);
-              alert(`[DEMO EMAIL SERVICE]\n\nYour verification code is: ${code}`);
-              resolve();
-          }, 800);
-      });
-  };
-
-  const handlePasswordLogin = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsLoggingIn(true);
-      setAuthError('');
-      try {
-          const user = await dbService.loadUserProfile(studentEmail);
-          if (user && user.password) {
-              const inputHash = await hashPassword(passwordInput);
-              if (inputHash === user.password) {
-                  performLoginSuccess(user, 'student');
-              } else {
-                  setAuthError("Incorrect password.");
-                  setIsLoggingIn(false);
-              }
-          } else {
-              setAuthError("Incorrect password.");
-              setIsLoggingIn(false);
-          }
-      } catch (err) {
-          setAuthError("Login failed.");
-          setIsLoggingIn(false);
-      }
-  };
-
-  const handleVerifyCode = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setAuthError('');
-      if (verifyCodeInput !== generatedCode) {
-          setAuthError('Invalid code. Please check your email.');
-          return;
-      }
-      setIsLoggingIn(true);
-      try {
-          const existingUser = await dbService.loadUserProfile(studentEmail);
-          if (existingUser) {
-              performLoginSuccess(existingUser, 'student');
-          } else {
-              setStudentStep('register');
-              setIsLoggingIn(false);
-          }
-      } catch (err) {
-          setAuthError("Database connection failed.");
-          setIsLoggingIn(false);
-      }
-  };
-
+  // --- STUDENT REGISTRATION (Firebase Auth + Firestore) ---
   const handleRegistrationSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!regData.realName || !regData.username || !regData.yearLevel || !regData.school || !regData.password) {
-          setAuthError("Please fill in all required fields.");
-          return;
-      }
-      setIsLoggingIn(true);
-      const hashedPwd = await hashPassword(regData.password);
+    e.preventDefault();
+    if (!regData.realName || !regData.username || !regData.yearLevel || !regData.school || !regData.password) {
+      setAuthError("Please fill in all required fields.");
+      return;
+    }
+    if (!auth) {
+      setAuthError('Authentication service not configured.');
+      return;
+    }
+
+    setIsLoggingIn(true);
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, studentEmail, regData.password);
+      const uid = credential.user.uid;
+
       const newProfile: UserProfile = {
-          email: studentEmail,
-          ...regData,
-          password: hashedPwd,
-          pictureUrl: undefined,
-          joinedAt: new Date().toISOString()
+        email: studentEmail,
+        realName: regData.realName,
+        username: regData.username,
+        school: regData.school,
+        yearLevel: regData.yearLevel,
+        referralSource: regData.referralSource,
+        joinedAt: new Date().toISOString(),
       };
-      try {
-          await dbService.saveUserProfile(newProfile);
-          setTimeout(() => {
-              performLoginSuccess(newProfile, 'student');
-          }, 1000);
-      } catch (err) {
-          setAuthError("Failed to create account. Please try again.");
-          setIsLoggingIn(false);
+      await dbService.saveUserProfile(uid, newProfile);
+
+      setTimeout(() => {
+        performLoginSuccess(newProfile, 'student', uid);
+      }, 500);
+    } catch (err: any) {
+      if (err.code === 'auth/email-already-in-use') {
+        setAuthError('This email is already registered. Please sign in instead.');
+        setStudentStep('login');
+      } else if (err.code === 'auth/weak-password') {
+        setAuthError('Password must be at least 6 characters.');
+      } else {
+        setAuthError('Failed to create account. Please try again.');
       }
+      setIsLoggingIn(false);
+    }
   };
 
-  const performLoginSuccess = (user: UserProfile | null, targetView: 'student' | 'teacher') => {
+  const performLoginSuccess = (user: UserProfile | null, targetView: 'student' | 'teacher', uid?: string) => {
     setIsLoggingIn(true);
     setTimeout(() => {
       setIsLoggingIn(false);
-      onLoginSuccess(user, targetView);
+      onLoginSuccess(user, targetView, uid);
       setAdminPasswordInput('');
       setFailedAttempts(0);
       setLockoutUntil(null);
@@ -254,15 +234,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                 {/* --- STUDENT LOGIN FLOW --- */}
                 {target === 'student' && (
                     <>
-                    {studentStep === 'email' && (
+                    {studentStep === 'login' && (
                         <div className="text-center">
                             <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-5">
-                              <Mail className="w-6 h-6 text-gray-600" />
+                              <Lock className="w-6 h-6 text-gray-600" />
                             </div>
                             <h2 className="text-xl font-semibold text-gray-900 mb-1">Sign in</h2>
-                            <p className="text-gray-500 mb-8 text-sm">Enter your email to get started.</p>
+                            <p className="text-gray-500 mb-8 text-sm">Enter your email and password.</p>
 
-                            <form onSubmit={handleEmailSubmit} className="space-y-4 text-left">
+                            <form onSubmit={handleStudentLogin} className="space-y-4 text-left">
                                 <div>
                                     <label className={labelClasses}>Email Address</label>
                                     <div className="relative">
@@ -279,28 +259,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                     </div>
                                 </div>
 
-                                {authError && (
-                                    <div className="text-red-600 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-200">
-                                        <AlertCircle className="w-4 h-4 shrink-0" /> {authError}
-                                    </div>
-                                )}
-
-                                <button type="submit" disabled={isLoggingIn} className={primaryBtnClasses}>
-                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4" /></>}
-                                </button>
-                            </form>
-                        </div>
-                    )}
-
-                    {studentStep === 'password' && (
-                        <div className="text-center animate-in slide-in-from-right-10 duration-300">
-                             <div className="w-12 h-12 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center mx-auto mb-5">
-                                <Lock className="w-6 h-6" />
-                             </div>
-                             <h2 className="text-xl font-semibold text-gray-900 mb-1">Welcome back!</h2>
-                             <p className="text-gray-500 mb-6 text-sm">{studentEmail}</p>
-
-                             <form onSubmit={handlePasswordLogin} className="space-y-4 text-left">
                                 <div>
                                     <label className={labelClasses}>Password</label>
                                     <input
@@ -310,7 +268,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                         placeholder="Enter your password"
                                         required
                                         className={inputClasses}
-                                        autoFocus
                                     />
                                 </div>
 
@@ -321,77 +278,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 )}
 
                                 <button type="submit" disabled={isLoggingIn} className={primaryBtnClasses}>
-                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign in'}
+                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Sign in <ArrowRight className="w-4 h-4" /></>}
                                 </button>
 
                                 <div className="text-center pt-2">
                                     <button
                                         type="button"
-                                        onClick={async () => {
-                                            setIsLoggingIn(true);
-                                            await sendVerificationCode();
-                                            setIsLoggingIn(false);
-                                            setStudentStep('verify');
-                                        }}
+                                        onClick={() => { setStudentStep('register'); setAuthError(''); }}
                                         className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                                     >
-                                        Forgot password? Use a code instead
+                                        Don't have an account? Register
                                     </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => { setStudentStep('email'); setAuthError(''); }}
-                                    className={ghostBtnClasses}
-                                >
-                                    Go Back
-                                </button>
-                            </form>
-                        </div>
-                    )}
-
-                    {studentStep === 'verify' && (
-                        <div className="text-center animate-in slide-in-from-right-10 duration-300">
-                             <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your email</h2>
-                             <p className="text-gray-500 mb-8 text-sm">
-                                We sent a 6-digit code to <strong className="text-gray-900">{studentEmail}</strong>.<br/>
-                                <span className="text-xs text-blue-600">(Check browser alert for demo code)</span>
-                             </p>
-
-                             <form onSubmit={handleVerifyCode} className="space-y-6 text-left">
-                                <div>
-                                    <label className={labelClasses}>Verification Code</label>
-                                    <div className="relative">
-                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            value={verifyCodeInput}
-                                            onChange={(e) => setVerifyCodeInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-                                            placeholder="123456"
-                                            required
-                                            maxLength={6}
-                                            className={`${inputWithIconClasses} tracking-[0.5em] font-mono text-center text-lg font-bold`}
-                                            autoFocus
-                                        />
-                                    </div>
-                                </div>
-
-                                {authError && (
-                                    <div className="text-red-600 text-sm flex items-center gap-2 bg-red-50 p-3 rounded-lg border border-red-200">
-                                        <AlertCircle className="w-4 h-4 shrink-0" /> {authError}
-                                    </div>
-                                )}
-
-                                <button type="submit" disabled={isLoggingIn || verifyCodeInput.length !== 6} className={primaryBtnClasses}>
-                                    {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Verify <Check className="w-4 h-4" /></>}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => { setStudentStep('email'); setAuthError(''); }}
-                                    className={ghostBtnClasses}
-                                >
-                                    Change Email
-                                </button>
                             </form>
                         </div>
                     )}
@@ -402,11 +300,28 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 <div className="w-12 h-12 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                     <User className="w-6 h-6" />
                                 </div>
-                                <h2 className="text-xl font-semibold text-gray-900">Create your profile</h2>
-                                <p className="text-gray-500 text-sm">{studentEmail}</p>
+                                <h2 className="text-xl font-semibold text-gray-900">Create your account</h2>
+                                <p className="text-gray-500 text-sm">{studentEmail || 'Fill in your details below'}</p>
                             </div>
 
                             <form onSubmit={handleRegistrationSubmit} className="space-y-3">
+                                {!studentEmail && (
+                                    <div>
+                                        <label className={labelClasses}>Email Address</label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                            <input
+                                                type="email"
+                                                required
+                                                value={studentEmail}
+                                                onChange={(e) => setStudentEmail(e.target.value)}
+                                                className={inputWithIconClasses}
+                                                placeholder="student@example.com"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className={labelClasses}>Full Name</label>
@@ -438,7 +353,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                         value={regData.password}
                                         onChange={e => setRegData({...regData, password: e.target.value})}
                                         className={inputClasses}
-                                        placeholder="Set a password"
+                                        placeholder="At least 6 characters"
                                     />
                                 </div>
 
@@ -496,6 +411,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                 <button type="submit" disabled={isLoggingIn} className={`${primaryBtnClasses} mt-2`}>
                                     {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
                                 </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => { setStudentStep('login'); setAuthError(''); }}
+                                    className={ghostBtnClasses}
+                                >
+                                    Already have an account? Sign in
+                                </button>
                             </form>
                         </div>
                     )}
@@ -536,7 +459,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                     type="password"
                                     value={adminPasswordInput}
                                     onChange={(e) => setAdminPasswordInput(e.target.value)}
-                                    placeholder="••••"
+                                    placeholder="Enter password"
                                     disabled={isLoggingIn || !!lockoutUntil}
                                     className={`${inputWithIconClasses} tracking-widest font-bold`}
                                 />

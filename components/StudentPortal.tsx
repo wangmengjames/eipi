@@ -8,6 +8,7 @@ import { dbService } from '../services/dbService';
 interface StudentPortalProps {
   onExit: () => void;
   user: UserProfile | null;
+  uid: string;
 }
 
 type ExamState = 'intro' | 'active' | 'result';
@@ -21,7 +22,7 @@ interface ExamResult {
   topicStats: Record<string, { total: number, correct: number }>;
 }
 
-const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
+const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid }) => {
   const [examState, setExamState] = useState<ExamState>('intro');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [bankSize, setBankSize] = useState(0);
@@ -80,7 +81,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
         }
 
         try {
-            const savedHistory = await dbService.loadHistory(user?.email);
+            const savedHistory = await dbService.loadHistory(uid);
             if (savedHistory && Array.isArray(savedHistory)) {
                 setHistory(savedHistory);
             }
@@ -199,10 +200,8 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user }) => {
     try {
         await new Promise(r => setTimeout(r, 500));
         const result = calculateResults();
-        const currentHistory = historyRef.current;
-        const newHistory = [result, ...currentHistory];
-        setHistory(newHistory);
-        try { await dbService.saveHistory(newHistory, user?.email); } catch (dbError) { console.error("Failed to save history", dbError); }
+        setHistory(prev => [result, ...prev]);
+        try { await dbService.saveHistory(uid, result); } catch (dbError) { console.error("Failed to save history", dbError); }
         setExamState('result');
         setReviewMode(false);
     } catch (error) {

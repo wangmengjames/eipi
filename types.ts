@@ -30,7 +30,6 @@ export interface UserProfile {
   referralSource: string;
   joinedAt: string;
   pictureUrl?: string;
-  password?: string;
 }
 
 // Global declaration for external libraries loaded via CDN

@@ -1,4 +1,3 @@
-
 import React, { Component, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import TeacherPortal from './components/TeacherPortal';
@@ -6,7 +5,10 @@ import StudentPortal from './components/StudentPortal';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
 import { UserProfile } from './types';
-import { Lock, AlertTriangle } from 'lucide-react';
+import { auth } from './services/firebaseClient';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { dbService } from './services/dbService';
+import { Lock, AlertTriangle, Loader2 } from 'lucide-react';
 
 class ErrorBoundary extends Component<
   { children: React.ReactNode },
@@ -51,38 +53,90 @@ const AppContent: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginTarget, setLoginTarget] = useState<'student' | 'teacher'>('student');
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [firebaseUid, setFirebaseUid] = useState<string | null>(null);
   const [isTeacherAuth, setIsTeacherAuth] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Firebase auth state listener — restores session on refresh
+  useEffect(() => {
+    if (!auth) {
+      setAuthLoading(false);
+      return;
+    }
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const uid = firebaseUser.uid;
+        setFirebaseUid(uid);
+        try {
+          const profile = await dbService.loadUserProfile(uid);
+          if (profile) {
+            setCurrentUser(profile);
+          } else {
+            // User exists in Firebase Auth but no profile in Firestore
+            // This is the teacher case (or a profile that wasn't saved)
+            setIsTeacherAuth(true);
+          }
+        } catch (e) {
+          console.error('[Auth] Failed to load profile on restore', e);
+        }
+      } else {
+        setCurrentUser(null);
+        setFirebaseUid(null);
+        setIsTeacherAuth(false);
+      }
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Route protection: redirect to home if not authenticated
   useEffect(() => {
+    if (authLoading) return;
     if (location.pathname === '/exam' && !currentUser) {
       navigate('/');
     }
     if (location.pathname === '/admin' && !isTeacherAuth) {
       navigate('/');
     }
-  }, [location.pathname, currentUser, isTeacherAuth, navigate]);
+  }, [location.pathname, currentUser, isTeacherAuth, navigate, authLoading]);
 
   const handleLoginClick = (target: 'student' | 'teacher') => {
     setLoginTarget(target);
     setShowLoginModal(true);
   };
 
-  const handleLoginSuccess = (user: UserProfile | null, targetView: 'student' | 'teacher') => {
+  const handleLoginSuccess = (user: UserProfile | null, targetView: 'student' | 'teacher', uid?: string) => {
     if (targetView === 'teacher') {
       setIsTeacherAuth(true);
     } else {
       setCurrentUser(user);
+      if (uid) setFirebaseUid(uid);
     }
     setShowLoginModal(false);
     navigate(targetView === 'student' ? '/exam' : '/admin');
   };
 
-  const handleExit = () => {
+  const handleExit = async () => {
+    if (auth) {
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.error('[Auth] Sign out failed', e);
+      }
+    }
     setCurrentUser(null);
+    setFirebaseUid(null);
     setIsTeacherAuth(false);
     navigate('/');
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 overflow-x-hidden relative">
@@ -108,7 +162,7 @@ const AppContent: React.FC = () => {
           </>
         } />
         <Route path="/exam" element={
-          currentUser ? <StudentPortal user={currentUser} onExit={handleExit} /> : null
+          currentUser && firebaseUid ? <StudentPortal user={currentUser} uid={firebaseUid} onExit={handleExit} /> : null
         } />
         <Route path="/admin" element={
           isTeacherAuth ? <TeacherPortal onExit={handleExit} /> : null

@@ -15,10 +15,10 @@ const TeacherPortal: React.FC<TeacherPortalProps> = ({ onExit }) => {
   const [activeTab, setActiveTab] = useState<'students' | 'bank'>('students');
 
   // Student Management
-  const [students, setStudents] = useState<UserProfile[]>([]);
+  const [students, setStudents] = useState<(UserProfile & { uid: string })[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedStudent, setSelectedStudent] = useState<UserProfile | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<(UserProfile & { uid: string }) | null>(null);
 
   // Bank Stats
   const [bankQuestions, setBankQuestions] = useState<Question[]>([]);
@@ -80,12 +80,12 @@ const TeacherPortal: React.FC<TeacherPortalProps> = ({ onExit }) => {
     } catch { return iso; }
   };
 
-  const handleDeleteStudent = async (email: string) => {
-    if (!confirm(`Remove student ${email}? This will delete their profile and history.`)) return;
+  const handleDeleteStudent = async (student: UserProfile & { uid: string }) => {
+    if (!confirm(`Remove student ${student.email}? This will delete their profile and history.`)) return;
     try {
-      await dbService.deleteUserProfile(email);
-      setStudents(prev => prev.filter(s => s.email !== email));
-      if (selectedStudent?.email === email) setSelectedStudent(null);
+      await dbService.deleteUserProfile(student.uid);
+      setStudents(prev => prev.filter(s => s.uid !== student.uid));
+      if (selectedStudent?.uid === student.uid) setSelectedStudent(null);
     } catch (e) {
       console.error("Failed to delete student", e);
     }
@@ -195,10 +195,10 @@ const TeacherPortal: React.FC<TeacherPortalProps> = ({ onExit }) => {
                 ) : (
                   filteredStudents.map(student => (
                     <button
-                      key={student.email}
+                      key={student.uid}
                       onClick={() => setSelectedStudent(student)}
                       className={`w-full text-left p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-3 ${
-                        selectedStudent?.email === student.email ? 'bg-blue-50 border-l-2 border-l-blue-500' : 'border-l-2 border-l-transparent'
+                        selectedStudent?.uid === student.uid ? 'bg-blue-50 border-l-2 border-l-blue-500' : 'border-l-2 border-l-transparent'
                       }`}
                     >
                       <div className="w-9 h-9 rounded-full bg-gray-100 text-blue-600 flex items-center justify-center font-semibold text-sm shrink-0">
@@ -261,7 +261,7 @@ const TeacherPortal: React.FC<TeacherPortalProps> = ({ onExit }) => {
                       </div>
 
                       <button
-                        onClick={() => handleDeleteStudent(selectedStudent.email)}
+                        onClick={() => handleDeleteStudent(selectedStudent)}
                         className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-colors mt-4"
                       >
                         <Trash2 className="w-4 h-4" /> Remove Student
