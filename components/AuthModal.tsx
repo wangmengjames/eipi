@@ -136,12 +136,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
       const profile = await dbService.loadUserProfile(uid);
       performLoginSuccess(profile, 'student', uid);
     } catch (err: any) {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        // User doesn't exist — prompt registration
-        setRegData(prev => ({ ...prev, password: passwordInput }));
-        setStudentStep('register');
-      } else if (err.code === 'auth/wrong-password') {
-        setAuthError('Incorrect password.');
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+        setAuthError('Invalid email or password.');
       } else if (err.code === 'auth/too-many-requests') {
         setAuthError('Too many attempts. Please try again later.');
       } else {

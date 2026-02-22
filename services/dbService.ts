@@ -139,6 +139,10 @@ export const dbService = {
 
   deleteUserProfile: async (uid: string): Promise<void> => {
     if (!isFirebaseConfigured() || !db) return;
+    // Delete exam_history subcollection first
+    const historySnap = await getDocs(collection(db, 'users', uid, 'exam_history'));
+    const deletes = historySnap.docs.map(d => deleteDoc(d.ref));
+    await Promise.all(deletes);
     await deleteDoc(doc(db, 'users', uid));
   },
 
