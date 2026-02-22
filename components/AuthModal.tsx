@@ -258,19 +258,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
     }
     setIsLoggingIn(true);
     try {
-      // Re-authenticate if auth session was lost
-      let currentUser = auth?.currentUser;
-      if (!currentUser && auth && googleProvider) {
-        try {
-          const result = await signInWithPopup(auth, googleProvider);
-          currentUser = result.user;
-          googleUserRef.current = result.user;
-        } catch {
-          setAuthError('Please sign in with Google again.');
-          setIsLoggingIn(false);
-          return;
-        }
-      }
       const savedUser = googleUserRef.current;
       const newProfile: UserProfile = {
         email: studentEmail,
