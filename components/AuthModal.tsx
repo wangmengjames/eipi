@@ -3,7 +3,7 @@ import { X, User, School, Mail, ShieldCheck, KeyRound, Clock, AlertCircle, Loade
 import { UserProfile } from '../types';
 import { dbService } from '../services/dbService';
 import { auth } from '../services/firebaseClient';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,23 +12,12 @@ interface AuthModalProps {
   onLoginSuccess: (user: UserProfile | null, target: 'student' | 'teacher', uid?: string) => void;
 }
 
-const hashPassword = async (password: string): Promise<string> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
-
-const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').toLowerCase();
-const ADMIN_PASSWORD_HASH = import.meta.env.VITE_ADMIN_PASSWORD_HASH || '';
-
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginSuccess }) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Teacher Auth State
-  const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [adminEmailInput, setAdminEmailInput] = useState('');
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
 
@@ -80,28 +69,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
     return () => clearInterval(interval);
   }, [lockoutUntil]);
 
-  // --- TEACHER LOGIN ---
+  // --- TEACHER LOGIN (Firebase Auth + Firestore admin check) ---
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (lockoutUntil) return;
 
-    if (adminEmailInput.toLowerCase() !== ADMIN_EMAIL) {
-        setAuthError('Unauthorized email address.');
-        return;
+    if (!auth) {
+      setAuthError('Authentication service not configured.');
+      return;
     }
 
-    const inputHash = await hashPassword(adminPasswordInput);
-    if (inputHash === ADMIN_PASSWORD_HASH) {
-      // Also sign into Firebase to get Firestore access
-      if (auth) {
-        try {
-          await signInWithEmailAndPassword(auth, adminEmailInput.toLowerCase(), adminPasswordInput);
-        } catch (e) {
-          console.warn('[Firebase] Teacher Firebase sign-in failed, continuing with env var auth', e);
-        }
+    setIsLoggingIn(true);
+    try {
+      const credential = await signInWithEmailAndPassword(auth, adminEmailInput.toLowerCase(), adminPasswordInput);
+      const uid = credential.user.uid;
+      const isAdmin = await dbService.checkIsAdmin(uid);
+      if (isAdmin) {
+        performLoginSuccess(null, 'teacher', uid);
+      } else {
+        await signOut(auth);
+        setAuthError('This account is not authorized for staff access.');
+        setIsLoggingIn(false);
       }
-      performLoginSuccess(null, 'teacher');
-    } else {
+    } catch (err: any) {
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
       if (newAttempts >= 3) {
@@ -109,10 +99,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
         setLockoutUntil(lockoutTime);
         setTimeRemaining(60);
         setAuthError('Too many failed attempts.');
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setAuthError(`Invalid credentials. ${3 - newAttempts} attempts remaining.`);
+      } else if (err.code === 'auth/too-many-requests') {
+        setAuthError('Too many attempts. Please try again later.');
       } else {
-        setAuthError(`Incorrect code. ${3 - newAttempts} attempts remaining.`);
-        setAdminPasswordInput('');
+        setAuthError('Login failed. Please try again.');
       }
+      setAdminPasswordInput('');
+      setIsLoggingIn(false);
     }
   };
 

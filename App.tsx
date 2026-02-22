@@ -68,16 +68,21 @@ const AppContent: React.FC = () => {
         const uid = firebaseUser.uid;
         setFirebaseUid(uid);
         try {
-          const profile = await dbService.loadUserProfile(uid);
-          if (profile) {
-            setCurrentUser(profile);
-          } else {
-            // User exists in Firebase Auth but no profile in Firestore
-            // This is the teacher case (or a profile that wasn't saved)
+          const isAdmin = await dbService.checkIsAdmin(uid);
+          if (isAdmin) {
             setIsTeacherAuth(true);
+          } else {
+            const profile = await dbService.loadUserProfile(uid);
+            if (profile) {
+              setCurrentUser(profile);
+            } else {
+              // Not admin and no student profile — orphaned auth account, sign out
+              await signOut(auth);
+              setFirebaseUid(null);
+            }
           }
         } catch (e) {
-          console.error('[Auth] Failed to load profile on restore', e);
+          console.error('[Auth] Failed to restore session', e);
         }
       } else {
         setCurrentUser(null);

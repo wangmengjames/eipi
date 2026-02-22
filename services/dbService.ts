@@ -69,6 +69,13 @@ const idbLoad = async (storeName: string, key: string): Promise<any> => {
 // =====================================================
 
 export const dbService = {
+  // --- Admin check (Firestore `admins` collection) ---
+  checkIsAdmin: async (uid: string): Promise<boolean> => {
+    if (!isFirebaseConfigured() || !db) return false;
+    const snap = await getDoc(doc(db, 'admins', uid));
+    return snap.exists();
+  },
+
   // --- Live question bank (from exam-data.json, cached in IDB) ---
   saveLiveBank: (questions: Question[]) => idbSave(STORES.LIVE, questions, 'main'),
   loadLiveBank: () => idbLoad(STORES.LIVE, 'main'),
