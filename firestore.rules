@@ -17,8 +17,10 @@ service cloud.firestore {
     match /users/{userId} {
       // Only the profile owner or an admin can read
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      // Only the owner can write (with field validation); admins can also write
-      allow write: if request.auth != null && ((request.auth.uid == userId && request.resource.data.keys().hasOnly(['email', 'realName', 'username', 'school', 'yearLevel', 'referralSource', 'joinedAt', 'pictureUrl', 'authProvider'])) || isAdmin());
+      // Only the owner can create/update (with field validation); admins can also write
+      allow create: if request.auth != null && ((request.auth.uid == userId && request.resource.data.keys().hasOnly(['email', 'realName', 'username', 'school', 'yearLevel', 'referralSource', 'joinedAt', 'pictureUrl', 'authProvider'])) || isAdmin());
+      allow update: if request.auth != null && ((request.auth.uid == userId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'realName', 'username', 'school', 'yearLevel', 'referralSource', 'joinedAt', 'pictureUrl', 'authProvider'])) || isAdmin());
+      allow delete: if request.auth != null && isAdmin();
 
       // Exam history subcollection
       match /exam_history/{historyId} {
