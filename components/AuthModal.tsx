@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, User, School, Mail, ShieldCheck, KeyRound, Clock, AlertCircle, Loader2, ArrowRight, Lock } from 'lucide-react';
 import { UserProfile } from '../types';
 import { dbService } from '../services/dbService';
@@ -28,6 +28,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
   const [authError, setAuthError] = useState('');
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [googleUid, setGoogleUid] = useState<string | null>(null);
+  const googleUserRef = useRef<any>(null);
 
   // Registration Data
   const [regData, setRegData] = useState({
@@ -49,6 +50,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
         setStudentStep('login');
         setIsLoggingIn(false);
         setGoogleUid(null);
+        googleUserRef.current = null;
         setRegData({ realName: '', username: '', yearLevel: '', school: '', referralSource: '', password: '' });
     }
   }, [isOpen]);
@@ -208,6 +210,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const uid = result.user.uid;
+      googleUserRef.current = result.user;
       const profile = await dbService.loadUserProfile(uid);
       if (profile) {
         performLoginSuccess(profile, 'student', uid);
@@ -215,9 +218,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
         // New Google user — collect remaining fields
         setGoogleUid(uid);
         setStudentEmail(result.user.email || '');
+        const displayName = result.user.displayName || '';
         setRegData(prev => ({
           ...prev,
-          realName: result.user.displayName || '',
+          realName: displayName,
+          username: displayName.split(' ')[0] + Math.floor(Math.random() * 1000),
+          yearLevel: 'Year 9',
         }));
         setStudentStep('google-register');
         setIsLoggingIn(false);
@@ -246,32 +252,35 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
       setAuthError('No Google UID found. Please sign in with Google again.');
       return;
     }
-    if (!regData.username || !regData.yearLevel || !regData.school) {
+    if (!regData.yearLevel || !regData.school) {
       setAuthError("Please fill in all required fields.");
       return;
     }
     setIsLoggingIn(true);
     try {
-      const googleUser = auth?.currentUser;
-      if (!googleUser) {
-        setAuthError('Auth session lost. Please close this modal and sign in with Google again.');
-        setIsLoggingIn(false);
-        return;
+      // Re-authenticate if auth session was lost
+      let currentUser = auth?.currentUser;
+      if (!currentUser && auth && googleProvider) {
+        try {
+          const result = await signInWithPopup(auth, googleProvider);
+          currentUser = result.user;
+          googleUserRef.current = result.user;
+        } catch {
+          setAuthError('Please sign in with Google again.');
+          setIsLoggingIn(false);
+          return;
+        }
       }
-      if (googleUser.uid !== googleUid) {
-        setAuthError(`UID mismatch: auth=${googleUser.uid}, stored=${googleUid}. Please try again.`);
-        setIsLoggingIn(false);
-        return;
-      }
+      const savedUser = googleUserRef.current;
       const newProfile: UserProfile = {
         email: studentEmail,
-        realName: regData.realName || googleUser?.displayName || '',
+        realName: regData.realName || savedUser?.displayName || '',
         username: regData.username,
         school: regData.school,
         yearLevel: regData.yearLevel,
         referralSource: regData.referralSource,
         joinedAt: new Date().toISOString(),
-        pictureUrl: googleUser?.photoURL || undefined,
+        pictureUrl: savedUser?.photoURL || undefined,
         authProvider: 'google',
       };
       await dbService.saveUserProfile(googleUid, newProfile);
@@ -583,42 +592,35 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                             </div>
 
                             <form onSubmit={handleGoogleRegistrationSubmit} className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className={labelClasses}>Full Name</label>
-                                        <input
-                                            required
-                                            value={regData.realName}
-                                            onChange={e => setRegData({...regData, realName: e.target.value})}
-                                            className={inputClasses}
-                                            placeholder="John Doe"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className={labelClasses}>Username</label>
-                                        <input
-                                            required
-                                            value={regData.username}
-                                            onChange={e => setRegData({...regData, username: e.target.value})}
-                                            className={inputClasses}
-                                            placeholder="Display name"
-                                        />
-                                    </div>
-                                </div>
-
                                 <div>
                                     <label className={labelClasses}>School</label>
-                                    <div className="relative">
-                                        <School className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <select
+                                        required
+                                        value={regData.school}
+                                        onChange={e => setRegData({...regData, school: e.target.value})}
+                                        className={inputClasses}
+                                    >
+                                        <option value="">Select your school</option>
+                                        <option value="Melbourne High School">Melbourne High School</option>
+                                        <option value="Mac.Robertson Girls' High School">Mac.Robertson Girls' High School</option>
+                                        <option value="Nossal High School">Nossal High School</option>
+                                        <option value="Suzanne Cory High School">Suzanne Cory High School</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                {regData.school === 'Other' && (
+                                    <div>
+                                        <label className={labelClasses}>School Name</label>
                                         <input
                                             required
-                                            value={regData.school}
-                                            onChange={e => setRegData({...regData, school: e.target.value})}
-                                            className={inputWithIconClasses}
-                                            placeholder="Current school"
+                                            value={regData.referralSource}
+                                            onChange={e => setRegData({...regData, referralSource: e.target.value})}
+                                            className={inputClasses}
+                                            placeholder="Enter your school name"
                                         />
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
@@ -629,7 +631,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                             onChange={e => setRegData({...regData, yearLevel: e.target.value})}
                                             className={inputClasses}
                                         >
-                                            <option value="">Select</option>
                                             <option value="Year 7">Year 7</option>
                                             <option value="Year 8">Year 8</option>
                                             <option value="Year 9">Year 9</option>
@@ -637,17 +638,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                                         </select>
                                     </div>
                                     <div>
-                                        <label className={labelClasses}>Referral</label>
-                                        <select
-                                            value={regData.referralSource}
-                                            onChange={e => setRegData({...regData, referralSource: e.target.value})}
+                                        <label className={labelClasses}>Username</label>
+                                        <input
+                                            value={regData.username}
+                                            onChange={e => setRegData({...regData, username: e.target.value})}
                                             className={inputClasses}
-                                        >
-                                            <option value="">Optional</option>
-                                            <option value="Friend">Friend</option>
-                                            <option value="Teacher">Teacher</option>
-                                            <option value="Google">Google</option>
-                                        </select>
+                                            placeholder="Display name"
+                                        />
                                     </div>
                                 </div>
 
