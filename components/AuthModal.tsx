@@ -242,7 +242,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
   // --- GOOGLE REGISTRATION SUBMIT (Student — profile completion) ---
   const handleGoogleRegistrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!googleUid) return;
+    if (!googleUid) {
+      setAuthError('No Google UID found. Please sign in with Google again.');
+      return;
+    }
     if (!regData.username || !regData.yearLevel || !regData.school) {
       setAuthError("Please fill in all required fields.");
       return;
@@ -250,6 +253,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
     setIsLoggingIn(true);
     try {
       const googleUser = auth?.currentUser;
+      if (!googleUser) {
+        setAuthError('Auth session lost. Please close this modal and sign in with Google again.');
+        setIsLoggingIn(false);
+        return;
+      }
+      if (googleUser.uid !== googleUid) {
+        setAuthError(`UID mismatch: auth=${googleUser.uid}, stored=${googleUid}. Please try again.`);
+        setIsLoggingIn(false);
+        return;
+      }
       const newProfile: UserProfile = {
         email: studentEmail,
         realName: regData.realName || googleUser?.displayName || '',
