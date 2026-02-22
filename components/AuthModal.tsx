@@ -265,8 +265,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
       setTimeout(() => {
         performLoginSuccess(newProfile, 'student', googleUid);
       }, 500);
-    } catch (err) {
-      setAuthError('Failed to create account. Please try again.');
+    } catch (err: any) {
+      console.error('Google registration error:', err.code, err.message, err);
+      setAuthError(`Failed to create account: ${err.code || err.message}`);
       setIsLoggingIn(false);
     }
   };
