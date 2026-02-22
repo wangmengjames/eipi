@@ -4,6 +4,8 @@ import TeacherPortal from './components/TeacherPortal';
 import StudentPortal from './components/StudentPortal';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
+import PrivacyPage from './components/PrivacyPage';
+import TermsPage from './components/TermsPage';
 import { UserProfile } from './types';
 import { auth } from './services/firebaseClient';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -75,11 +77,8 @@ const AppContent: React.FC = () => {
             const profile = await dbService.loadUserProfile(uid);
             if (profile) {
               setCurrentUser(profile);
-            } else {
-              // Not admin and no student profile — orphaned auth account, sign out
-              await signOut(auth);
-              setFirebaseUid(null);
             }
+            // No profile yet — user may be completing Google registration, don't sign out
           }
         } catch (e) {
           console.error('[Auth] Failed to restore session', e);
@@ -172,6 +171,8 @@ const AppContent: React.FC = () => {
         <Route path="/admin" element={
           isTeacherAuth ? <TeacherPortal onExit={handleExit} /> : null
         } />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

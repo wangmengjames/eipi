@@ -756,8 +756,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Legal</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">Privacy</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">Terms</a></li>
+                  <li><a href="/privacy" className="text-gray-400 hover:text-blue-600 transition-colors">Privacy</a></li>
+                  <li><a href="/terms" className="text-gray-400 hover:text-blue-600 transition-colors">Terms</a></li>
                 </ul>
               </div>
             </div>

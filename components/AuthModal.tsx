@@ -741,7 +741,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
             <div className="bg-gray-50 px-8 py-4 border-t border-gray-200 text-center">
                 <p className="text-xs text-gray-400">
                     {target === 'student'
-                        ? 'By continuing, you agree to our Terms and Privacy Policy.'
+                        ? <>By continuing, you agree to our <a href="/terms" target="_blank" className="underline hover:text-gray-600">Terms</a> and <a href="/privacy" target="_blank" className="underline hover:text-gray-600">Privacy Policy</a>.</>
                         : 'Unauthorized access attempts are logged.'}
                 </p>
             </div>
