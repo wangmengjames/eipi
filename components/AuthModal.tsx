@@ -227,8 +227,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
         // User cancelled, do nothing
       } else if (err.code === 'auth/account-exists-with-different-credential') {
         setAuthError('An account already exists with this email. Please sign in with your password.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setAuthError('Popup was blocked by your browser. Please allow popups for this site.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setAuthError('This domain is not authorized for Google sign-in. Please contact the administrator.');
       } else {
-        setAuthError('Google sign-in failed. Please try again.');
+        console.error('Google sign-in error:', err.code, err.message);
+        setAuthError(`Google sign-in failed: ${err.code || err.message}`);
       }
       setIsLoggingIn(false);
     }
@@ -288,8 +293,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
     } catch (err: any) {
       if (err.code === 'auth/popup-closed-by-user') {
         // User cancelled
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setAuthError('This domain is not authorized for Google sign-in.');
       } else {
-        setAuthError('Google sign-in failed. Please try again.');
+        console.error('Teacher Google sign-in error:', err.code, err.message);
+        setAuthError(`Google sign-in failed: ${err.code || err.message}`);
       }
       setIsLoggingIn(false);
     }
