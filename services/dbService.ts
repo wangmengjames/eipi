@@ -97,6 +97,7 @@ export const dbService = {
       referralSource: profile.referralSource,
       joinedAt: profile.joinedAt,
       pictureUrl: profile.pictureUrl || null,
+      authProvider: profile.authProvider || null,
     }, { merge: true });
   },
 
@@ -114,6 +115,7 @@ export const dbService = {
       referralSource: data.referralSource || '',
       joinedAt: data.joinedAt || '',
       pictureUrl: data.pictureUrl || undefined,
+      authProvider: data.authProvider || undefined,
     };
   },
 
@@ -133,6 +135,7 @@ export const dbService = {
         referralSource: data.referralSource || '',
         joinedAt: data.joinedAt || '',
         pictureUrl: data.pictureUrl || undefined,
+        authProvider: data.authProvider || undefined,
       };
     });
   },

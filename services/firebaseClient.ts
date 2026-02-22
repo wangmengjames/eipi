@@ -1,5 +1,5 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, GoogleAuthProvider } from 'firebase/auth';
 import { initializeFirestore, Firestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -14,6 +14,7 @@ const firebaseConfig = {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
+let googleProvider: GoogleAuthProvider | null = null;
 
 if (firebaseConfig.apiKey && firebaseConfig.projectId) {
   app = initializeApp(firebaseConfig);
@@ -21,9 +22,10 @@ if (firebaseConfig.apiKey && firebaseConfig.projectId) {
   db = initializeFirestore(app, {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   });
+  googleProvider = new GoogleAuthProvider();
 }
 
-export { auth, db };
+export { auth, db, googleProvider };
 
 export const isFirebaseConfigured = (): boolean => {
   return !!app;
