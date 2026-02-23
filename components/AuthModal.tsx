@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User, School, Mail, ShieldCheck, KeyRound, Clock, AlertCircle, Loader2, ArrowRight, Lock } from 'lucide-react';
+import { X, User, Mail, ShieldCheck, KeyRound, Clock, AlertCircle, Loader2, ArrowRight, Lock } from 'lucide-react';
+import SchoolAutocomplete from './SchoolAutocomplete';
 import { UserProfile } from '../types';
 import { dbService } from '../services/dbService';
 import { auth, googleProvider } from '../services/firebaseClient';
@@ -488,16 +489,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
 
                                 <div>
                                     <label className={labelClasses}>School</label>
-                                    <div className="relative">
-                                        <School className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                        <input
-                                            required
-                                            value={regData.school}
-                                            onChange={e => setRegData({...regData, school: e.target.value})}
-                                            className={inputWithIconClasses}
-                                            placeholder="Current school"
-                                        />
-                                    </div>
+                                    <SchoolAutocomplete
+                                        value={regData.school}
+                                        onChange={val => setRegData({...regData, school: val})}
+                                        className={inputWithIconClasses}
+                                        placeholder="Start typing your school name"
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
@@ -581,33 +578,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, target, onLoginS
                             <form onSubmit={handleGoogleRegistrationSubmit} className="space-y-3">
                                 <div>
                                     <label className={labelClasses}>School</label>
-                                    <select
-                                        required
+                                    <SchoolAutocomplete
                                         value={regData.school}
-                                        onChange={e => setRegData({...regData, school: e.target.value})}
-                                        className={inputClasses}
-                                    >
-                                        <option value="">Select your school</option>
-                                        <option value="Melbourne High School">Melbourne High School</option>
-                                        <option value="Mac.Robertson Girls' High School">Mac.Robertson Girls' High School</option>
-                                        <option value="Nossal High School">Nossal High School</option>
-                                        <option value="Suzanne Cory High School">Suzanne Cory High School</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                        onChange={val => setRegData({...regData, school: val})}
+                                        className={inputWithIconClasses}
+                                        placeholder="Start typing your school name"
+                                    />
                                 </div>
-
-                                {regData.school === 'Other' && (
-                                    <div>
-                                        <label className={labelClasses}>School Name</label>
-                                        <input
-                                            required
-                                            value={regData.referralSource}
-                                            onChange={e => setRegData({...regData, referralSource: e.target.value})}
-                                            className={inputClasses}
-                                            placeholder="Enter your school name"
-                                        />
-                                    </div>
-                                )}
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
