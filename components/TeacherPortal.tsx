@@ -332,7 +332,7 @@ const TeacherPortal: React.FC<TeacherPortalProps> = ({ onExit }) => {
                   }
                   {bankStats.total === 0 && (
                     <div className="px-5 py-8 text-center text-gray-400 text-sm">
-                      No questions loaded. Check exam-data.json on GitHub.
+                      No questions loaded. Check questions/bank.md on GitHub.
                     </div>
                   )}
                 </div>
@@ -359,7 +359,7 @@ const TeacherPortal: React.FC<TeacherPortalProps> = ({ onExit }) => {
               )}
 
               <p className="text-xs text-gray-400 text-center pt-4">
-                Question bank is managed via GitHub. Edit <code className="text-blue-600 font-mono">exam-data.json</code> to update content.
+                Question bank is managed via GitHub. Edit <code className="text-blue-600 font-mono">questions/bank.md</code> to update content.
               </p>
             </div>
           </div>

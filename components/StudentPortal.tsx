@@ -4,6 +4,7 @@ import { Clock, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Flag, Awa
 import { Question, UserProfile } from '../types';
 import LatexRenderer from './LatexRenderer';
 import { dbService } from '../services/dbService';
+import { parseMarkdownQuestions, computeContentHash } from '../services/questionParser';
 
 interface StudentPortalProps {
   onExit: () => void;
@@ -54,21 +55,23 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid }) => {
     const initData = async () => {
         setIsSyncing(true);
         try {
-            const response = await fetch('/exam-data.json');
+            const response = await fetch('/questions/bank.md');
             if (response.ok) {
-                const remoteData = await response.json();
+                const markdown = await response.text();
+                const contentHash = await computeContentHash(markdown);
                 const localMeta = await dbService.loadLiveMetadata();
-                if (!localMeta || localMeta.version < remoteData.version) {
-                    await dbService.saveLiveBank(remoteData.questions);
+                if (!localMeta || localMeta.version !== contentHash) {
+                    const parsed = parseMarkdownQuestions(markdown);
+                    await dbService.saveLiveBank(parsed);
                     await dbService.saveLiveMetadata({
-                        version: remoteData.version,
-                        lastUpdated: remoteData.lastUpdated,
-                        description: remoteData.description
+                        version: contentHash,
+                        lastUpdated: new Date().toISOString(),
+                        description: 'Parsed from bank.md'
                     });
                 }
             }
         } catch (e) {
-            console.warn("Offline or failed to fetch exam-data.json, using local cache.", e);
+            console.warn("Offline or failed to fetch question bank, using local cache.", e);
         }
 
         try {

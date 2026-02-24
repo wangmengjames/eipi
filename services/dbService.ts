@@ -76,7 +76,7 @@ export const dbService = {
     return snap.exists();
   },
 
-  // --- Live question bank (from exam-data.json, cached in IDB) ---
+  // --- Live question bank (parsed from bank.md, cached in IDB) ---
   saveLiveBank: (questions: Question[]) => idbSave(STORES.LIVE, questions, 'main'),
   loadLiveBank: () => idbLoad(STORES.LIVE, 'main'),
   saveLiveMetadata: (meta: any) => idbSave(STORES.LIVE, meta, 'meta'),
