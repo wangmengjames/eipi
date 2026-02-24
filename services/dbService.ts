@@ -69,6 +69,14 @@ const idbLoad = async (storeName: string, key: string): Promise<any> => {
 // =====================================================
 
 export const dbService = {
+  // --- Premium status check ---
+  checkPremium: async (uid: string): Promise<boolean> => {
+    if (!isFirebaseConfigured() || !db) return false;
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (!snap.exists()) return false;
+    return snap.data().isPremium === true;
+  },
+
   // --- Admin check (Firestore `admins` collection) ---
   checkIsAdmin: async (uid: string): Promise<boolean> => {
     if (!isFirebaseConfigured() || !db) return false;

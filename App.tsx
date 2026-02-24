@@ -6,10 +6,12 @@ import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
 import PrivacyPage from './components/PrivacyPage';
 import TermsPage from './components/TermsPage';
+import SuccessPage from './components/SuccessPage';
 import { UserProfile } from './types';
 import { auth } from './services/firebaseClient';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { dbService } from './services/dbService';
+import { createCheckout } from './services/stripe';
 import { Lock, AlertTriangle, Loader2 } from 'lucide-react';
 
 class ErrorBoundary extends Component<
@@ -57,6 +59,7 @@ const AppContent: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [firebaseUid, setFirebaseUid] = useState<string | null>(null);
   const [isTeacherAuth, setIsTeacherAuth] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
 
   // Firebase auth state listener — restores session on refresh
@@ -78,6 +81,8 @@ const AppContent: React.FC = () => {
             if (profile) {
               setCurrentUser(profile);
             }
+            const premium = await dbService.checkPremium(uid);
+            setIsPremium(premium);
             // No profile yet — user may be completing Google registration, don't sign out
           }
         } catch (e) {
@@ -87,6 +92,7 @@ const AppContent: React.FC = () => {
         setCurrentUser(null);
         setFirebaseUid(null);
         setIsTeacherAuth(false);
+        setIsPremium(false);
       }
       setAuthLoading(false);
     });
@@ -120,6 +126,17 @@ const AppContent: React.FC = () => {
     navigate(targetView === 'student' ? '/exam' : '/admin');
   };
 
+  const handlePremiumClick = () => {
+    if (currentUser) {
+      createCheckout().catch(err => {
+        console.error('Checkout failed:', err);
+        alert('Failed to start checkout. Please try again.');
+      });
+    } else {
+      handleLoginClick('student');
+    }
+  };
+
   const handleExit = async () => {
     if (auth) {
       try {
@@ -131,6 +148,7 @@ const AppContent: React.FC = () => {
     setCurrentUser(null);
     setFirebaseUid(null);
     setIsTeacherAuth(false);
+    setIsPremium(false);
     navigate('/');
   };
 
@@ -154,7 +172,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={
           <>
-            <LandingPage onLoginClick={handleLoginClick} />
+            <LandingPage onLoginClick={handleLoginClick} onPremiumClick={handlePremiumClick} />
             <button
               onClick={() => handleLoginClick('teacher')}
               className="fixed bottom-6 right-6 z-[100] p-3 bg-white text-gray-300 hover:text-gray-600 border border-gray-200 hover:border-gray-300 rounded-full transition-all hover:scale-105 active:scale-95 shadow-sm"
@@ -166,8 +184,9 @@ const AppContent: React.FC = () => {
           </>
         } />
         <Route path="/exam" element={
-          currentUser && firebaseUid ? <StudentPortal user={currentUser} uid={firebaseUid} onExit={handleExit} /> : null
+          currentUser && firebaseUid ? <StudentPortal user={currentUser} uid={firebaseUid} onExit={handleExit} isPremium={isPremium} /> : null
         } />
+        <Route path="/success" element={<SuccessPage />} />
         <Route path="/admin" element={
           isTeacherAuth ? <TeacherPortal onExit={handleExit} /> : null
         } />

@@ -4,6 +4,7 @@ import { Mail, Lock, ChevronRight, Terminal, ArrowRight, Check, Clock, Shield, B
 
 interface LandingPageProps {
   onLoginClick: (target: 'student' | 'teacher') => void;
+  onPremiumClick?: () => void;
 }
 
 // --- Typing animation hook ---
@@ -103,7 +104,7 @@ const Reveal: React.FC<{ children: React.ReactNode; className?: string; delay?: 
 };
 
 
-const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onPremiumClick }) => {
   const heroLine1 = useTypingEffect('const exam = new SelectiveEntry();', 35, 300);
   const heroLine2 = useTypingEffect('exam.prepare({ state: "VIC" });', 35, 1800);
   const heroLine3 = useTypingEffect('// → 1150+ questions loaded', 30, 3200);
@@ -137,7 +138,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
             <div className="w-8 h-8 bg-gray-900 text-white rounded-lg flex items-center justify-center font-serif italic font-bold text-base">
                e<sup className="text-[9px] not-italic -mt-1.5">iπ</sup>
             </div>
-            <span className="font-semibold text-gray-900 text-sm tracking-tight">eipi<span className="text-gray-400">.edu</span></span>
+            <span className="font-semibold text-gray-900 text-sm tracking-tight">eipi</span>
           </div>
 
           {/* Desktop Nav */}
@@ -324,7 +325,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
           {/* School names */}
           <div className="mt-12 pt-6 border-t border-gray-100">
             <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-gray-400 text-xs">
-              <span className="text-gray-300 mr-2">targets:</span>
+              <span className="text-gray-300 mr-2">preparing for:</span>
               {['Melbourne High', 'Mac.Robertson', 'Nossal', 'Suzanne Cory', '|', 'James Ruse', 'North Sydney Boys', '|', 'Brisbane State High', 'Perth Modern'].map((name, i) => (
                 name === '|'
                   ? <span key={i} className="text-gray-200">·</span>
@@ -592,7 +593,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
             <Reveal delay={150}>
               <div className="bg-gray-900 border border-gray-900 rounded-2xl p-8 relative overflow-hidden h-full flex flex-col">
                 <div className="absolute top-0 right-0 px-3 py-1 bg-blue-500 text-white text-[10px] font-semibold rounded-bl-xl">
-                  COMING SOON
+                  BEST VALUE
                 </div>
 
                 <div className="flex items-center gap-3 mb-6">
@@ -601,7 +602,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-white">Premium</h3>
-                    <p className="text-xs text-gray-400">pricing TBA</p>
+                    <p className="text-xs text-gray-400">$29.99 AUD / one-time</p>
                   </div>
                 </div>
 
@@ -621,10 +622,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick }) => {
                 </ul>
 
                 <button
-                  disabled
-                  className="w-full py-3 bg-white/10 border border-white/20 rounded-xl text-gray-400 font-medium text-sm cursor-not-allowed"
+                  onClick={onPremiumClick}
+                  className="w-full py-3 bg-white text-gray-900 rounded-xl font-semibold text-sm hover:bg-gray-100 transition-colors"
                 >
-                  Notify me
+                  Unlock Premium
                 </button>
               </div>
             </Reveal>

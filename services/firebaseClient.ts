@@ -26,7 +26,7 @@ if (firebaseConfig.apiKey && firebaseConfig.projectId) {
   googleProvider = new GoogleAuthProvider();
 }
 
-export { auth, db, googleProvider };
+export { app, auth, db, googleProvider };
 
 export const isFirebaseConfigured = (): boolean => {
   return !!app;

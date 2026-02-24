@@ -4,12 +4,14 @@ import { Clock, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Flag, Awa
 import { Question, UserProfile } from '../types';
 import LatexRenderer from './LatexRenderer';
 import { dbService } from '../services/dbService';
+import { createCheckout } from '../services/stripe';
 import { parseMarkdownQuestions, computeContentHash } from '../services/questionParser';
 
 interface StudentPortalProps {
   onExit: () => void;
   user: UserProfile | null;
   uid: string;
+  isPremium?: boolean;
 }
 
 type ExamState = 'intro' | 'active' | 'result';
@@ -23,7 +25,7 @@ interface ExamResult {
   topicStats: Record<string, { total: number, correct: number }>;
 }
 
-const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid }) => {
+const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPremium = false }) => {
   const [examState, setExamState] = useState<ExamState>('intro');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [bankSize, setBankSize] = useState(0);
@@ -249,6 +251,13 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid }) => {
       if (examState !== 'result') return { allowedIds: new Set<string>(), totalMistakes: 0, limit: 0 };
       const incorrectQuestions = questions.filter(q => answers[q.id] !== q.correctAnswerIndex);
       const totalMistakes = incorrectQuestions.length;
+
+      // Premium users get unlimited access
+      if (isPremium) {
+        const allIds = new Set(questions.map(q => q.id));
+        return { allowedIds: allIds, totalMistakes, limit: totalMistakes };
+      }
+
       const limit = Math.min(5, Math.ceil(totalMistakes / 2));
       const allowedMistakeIds = new Set(incorrectQuestions.slice(0, limit).map(q => q.id));
       const allowedIds = new Set([
@@ -256,7 +265,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid }) => {
           ...allowedMistakeIds
       ]);
       return { allowedIds, totalMistakes, limit };
-  }, [examState, questions, answers]);
+  }, [examState, questions, answers, isPremium]);
 
   // --- INTRO ---
   const renderIntro = () => (
@@ -596,10 +605,17 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid }) => {
                       <>
                          <div className="text-4xl font-bold text-red-500 mb-1">{incorrectCount}</div>
                          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Mistakes</div>
-                         <div className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
-                            <EyeOff className="w-3 h-3" />
-                            Review: {visibleIncorrect} of {incorrectCount}
-                         </div>
+                         {isPremium ? (
+                            <div className="text-xs bg-green-50 text-green-600 px-3 py-1 rounded-full inline-flex items-center gap-1.5 border border-green-200">
+                               <CheckCircle className="w-3 h-3" />
+                               All unlocked
+                            </div>
+                         ) : (
+                            <div className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+                               <EyeOff className="w-3 h-3" />
+                               Review: {visibleIncorrect} of {incorrectCount}
+                            </div>
+                         )}
                       </>
                    ) : (
                       <>
@@ -777,9 +793,15 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid }) => {
                                     </div>
                                     <h3 className="text-xl font-semibold text-gray-900 mb-2">Detailed Analysis Locked</h3>
                                     <p className="text-gray-500 mb-6 max-w-md text-sm">
-                                        You've reached the free preview limit. Upgrade to Premium for full explanations.
+                                        You've reached the free preview limit. Unlock all explanations for a one-time payment of $29.99 AUD.
                                     </p>
-                                    <button className="bg-gray-900 text-white font-semibold py-3 px-8 rounded-xl transition-all flex items-center gap-2 text-sm hover:bg-gray-800">
+                                    <button
+                                        onClick={() => createCheckout().catch(err => {
+                                            console.error('Checkout failed:', err);
+                                            alert('Failed to start checkout. Please try again.');
+                                        })}
+                                        className="bg-gray-900 text-white font-semibold py-3 px-8 rounded-xl transition-all flex items-center gap-2 text-sm hover:bg-gray-800"
+                                    >
                                         <Crown className="w-5 h-5" /> Unlock Premium
                                     </button>
                                 </div>
