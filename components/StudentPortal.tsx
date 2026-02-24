@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Clock, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Flag, Award, BookOpen, LogOut, Lock, Trophy, BarChart3, EyeOff, XCircle, X, ArrowLeft, Loader2, Crown, Star, User } from 'lucide-react';
+import { Clock, AlertTriangle, CheckCircle, ChevronRight, ChevronLeft, Flag, Award, BookOpen, LogOut, Lock, Trophy, BarChart3, EyeOff, XCircle, X, ArrowLeft, Loader2, Crown, Star, User, LayoutGrid } from 'lucide-react';
 import { Question, UserProfile } from '../types';
 import LatexRenderer from './LatexRenderer';
 import { dbService } from '../services/dbService';
@@ -42,6 +42,8 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
 
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<'all' | 'incorrect' | 'flagged'>('all');
+  const [showMobileNav, setShowMobileNav] = useState(false);
+  const [showMobileReviewNav, setShowMobileReviewNav] = useState(false);
 
   const [history, setHistory] = useState<ExamResult[]>([]);
 
@@ -363,8 +365,8 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
     return (
       <div className="flex flex-col h-screen bg-gray-50">
         {/* Exam Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-3.5 flex justify-between items-center z-20 shadow-sm">
-           <div className="flex items-center gap-5">
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3.5 flex justify-between items-center z-20 shadow-sm">
+           <div className="flex items-center gap-3 sm:gap-5">
               <div className="flex items-center gap-2">
                  <span className="font-semibold text-gray-900 text-base">{currentQuestionIndex + 1}</span>
                  <span className="text-gray-400">/ {questions.length}</span>
@@ -376,7 +378,14 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
               </div>
            </div>
 
-           <div className="flex items-center gap-3">
+           <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => setShowMobileNav(true)}
+                className="md:hidden px-2.5 py-2.5 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1.5 text-sm font-medium"
+              >
+                 <LayoutGrid className="w-4 h-4" />
+                 <span className="text-xs tabular-nums">{Object.keys(answers).length}/{questions.length}</span>
+              </button>
               <button
                 onClick={() => {
                    const newFlagged = new Set(flagged);
@@ -384,20 +393,21 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
                    else newFlagged.add(currentQ.id);
                    setFlagged(newFlagged);
                 }}
-                className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium border ${
+                className={`px-3 py-2.5 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium border ${
                   isFlagged
                     ? 'bg-amber-50 text-amber-600 border-amber-200'
                     : 'bg-white text-gray-500 hover:text-gray-700 border-gray-200'
                 }`}
               >
                  <Flag className={`w-4 h-4 ${isFlagged ? 'fill-current' : ''}`} />
-                 {isFlagged ? 'Flagged' : 'Flag'}
+                 <span className="hidden sm:inline">{isFlagged ? 'Flagged' : 'Flag'}</span>
               </button>
               <button
                  onClick={handleRequestSubmit}
-                 className="bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors"
+                 className="bg-gray-900 text-white px-3 sm:px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors"
               >
-                 Finish Exam
+                 <span className="hidden sm:inline">Finish Exam</span>
+                 <span className="sm:hidden">Finish</span>
               </button>
            </div>
         </header>
@@ -438,6 +448,45 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
                  <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-50 border border-amber-200 rounded"></div> Flagged</div>
               </div>
            </div>
+
+           {/* Mobile Question Navigator */}
+           {showMobileNav && (
+             <div className="fixed inset-0 z-30 md:hidden">
+               <div className="absolute inset-0 bg-black/20" onClick={() => setShowMobileNav(false)} />
+               <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-5 pb-8 shadow-xl max-h-[60vh] overflow-y-auto">
+                 <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+                 <div className="flex items-center justify-between mb-4">
+                   <span className="text-sm font-semibold text-gray-900">Question Navigator</span>
+                   <span className="text-xs text-gray-400">{Object.keys(answers).length} of {questions.length} answered</span>
+                 </div>
+                 <div className="grid grid-cols-8 gap-1.5">
+                   {questions.map((q, idx) => {
+                     const isAns = answers[q.id] !== undefined;
+                     const isCurr = idx === currentQuestionIndex;
+                     const isFlg = flagged.has(q.id);
+                     let cls = "bg-gray-100 border-gray-200 text-gray-500";
+                     if (isCurr) cls = "bg-gray-900 text-white border-gray-900";
+                     else if (isFlg) cls = "bg-amber-50 border-amber-200 text-amber-600";
+                     else if (isAns) cls = "bg-blue-50 border-blue-200 text-blue-600";
+                     return (
+                       <button
+                         key={q.id}
+                         onClick={() => { setCurrentQuestionIndex(idx); setShowMobileNav(false); }}
+                         className={`aspect-square rounded-md flex items-center justify-center text-xs font-semibold border transition-all ${cls}`}
+                       >
+                         {idx + 1}
+                       </button>
+                     );
+                   })}
+                 </div>
+                 <div className="flex items-center gap-4 mt-4 pt-3 border-t border-gray-100 text-xs text-gray-400">
+                   <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-gray-900 rounded-sm"></div> Current</div>
+                   <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-blue-100 border border-blue-200 rounded-sm"></div> Answered</div>
+                   <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-amber-50 border border-amber-200 rounded-sm"></div> Flagged</div>
+                 </div>
+               </div>
+             </div>
+           )}
 
            {/* Question Content */}
            <div className="flex-1 overflow-y-auto p-6 md:p-10">
@@ -489,14 +538,14 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
               <button
                  onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
                  disabled={currentQuestionIndex === 0}
-                 className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-2 text-sm transition-colors"
+                 className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-2 text-sm transition-colors"
               >
                  <ChevronLeft className="w-4 h-4" /> Previous
               </button>
 
               <button
                  onClick={handleNext}
-                 className={`px-7 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all text-sm ${
+                 className={`px-7 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all text-sm ${
                      isLastQuestion
                      ? 'bg-green-600 text-white hover:bg-green-700'
                      : 'bg-gray-900 text-white hover:bg-gray-800'
@@ -646,15 +695,30 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
         // Review View
         const currentQ = questions[currentQuestionIndex];
         const isLocked = !freemiumConfig.allowedIds.has(currentQ.id);
+        const filteredIndices = questions.map((q, idx) => {
+          const isCorrect = answers[q.id] === q.correctAnswerIndex;
+          const isFlg = flagged.has(q.id);
+          const isVisible = reviewFilter === 'all' ||
+                          (reviewFilter === 'incorrect' && !isCorrect) ||
+                          (reviewFilter === 'flagged' && isFlg);
+          return isVisible ? idx : -1;
+        }).filter(i => i !== -1);
+        const currentFilterPos = filteredIndices.indexOf(currentQuestionIndex);
 
         return (
             <div className="flex flex-col h-screen bg-gray-50">
-               <header className="bg-white border-b border-gray-200 px-6 py-3.5 flex justify-between items-center z-20 shadow-sm">
-                  <div className="flex items-center gap-4">
+               <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3.5 flex justify-between items-center z-20 shadow-sm">
+                  <div className="flex items-center gap-3 sm:gap-4">
                      <button onClick={() => setReviewMode(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                         <ArrowLeft className="w-5 h-5 text-gray-500" />
                      </button>
-                     <h1 className="font-semibold text-gray-900">Review Answers</h1>
+                     <h1 className="font-semibold text-gray-900 text-sm sm:text-base">Review Answers</h1>
+                     <button
+                       onClick={() => setShowMobileReviewNav(true)}
+                       className="md:hidden px-2.5 py-2 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1.5 text-sm font-medium"
+                     >
+                       <LayoutGrid className="w-4 h-4" />
+                     </button>
                   </div>
 
                   <div className="flex bg-gray-100 p-1 rounded-lg">
@@ -662,7 +726,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
                           <button
                              key={f}
                              onClick={() => setReviewFilter(f as any)}
-                             className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition-all ${
+                             className={`px-2.5 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium capitalize transition-all ${
                                reviewFilter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                              }`}
                           >
@@ -672,7 +736,7 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
                   </div>
                </header>
 
-               <div className="flex-1 overflow-hidden flex">
+               <div className="flex-1 overflow-hidden flex relative">
                   {/* Sidebar */}
                   <div className="w-72 bg-white border-r border-gray-200 flex flex-col overflow-hidden hidden md:flex">
                      <div className="p-4 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -715,9 +779,53 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
                      </div>
                   </div>
 
+                  {/* Mobile Review Question List */}
+                  {showMobileReviewNav && (
+                    <div className="fixed inset-0 z-30 md:hidden">
+                      <div className="absolute inset-0 bg-black/20" onClick={() => setShowMobileReviewNav(false)} />
+                      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-5 pb-8 shadow-xl max-h-[60vh] overflow-y-auto">
+                        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-sm font-semibold text-gray-900">Questions</span>
+                          <span className="text-xs text-gray-400 capitalize">{reviewFilter !== 'all' ? reviewFilter : 'all questions'}</span>
+                        </div>
+                        <div className="space-y-1">
+                          {questions.map((q, idx) => {
+                            const isCorrect = answers[q.id] === q.correctAnswerIndex;
+                            const isFlg = flagged.has(q.id);
+                            const isVisible = reviewFilter === 'all' ||
+                                            (reviewFilter === 'incorrect' && !isCorrect) ||
+                                            (reviewFilter === 'flagged' && isFlg);
+                            if (!isVisible) return null;
+                            const isCurr = currentQuestionIndex === idx;
+                            const isRestricted = !freemiumConfig.allowedIds.has(q.id);
+                            return (
+                              <button
+                                key={q.id}
+                                onClick={() => { setCurrentQuestionIndex(idx); setShowMobileReviewNav(false); }}
+                                className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors ${
+                                  isCurr ? 'bg-gray-100' : 'hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                                  isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'
+                                }`}>
+                                  {isCorrect ? <CheckCircle className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                </div>
+                                <span className="text-sm font-semibold text-gray-700">Q{idx + 1}</span>
+                                <span className="text-xs text-gray-400 truncate flex-1">{q.text.substring(0, 35)}...</span>
+                                {isRestricted && <Lock className="w-3 h-3 text-gray-400 shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Review Content */}
                   <div className="flex-1 overflow-y-auto p-6 md:p-10">
-                     <div className="max-w-3xl mx-auto pb-20">
+                     <div className="max-w-3xl mx-auto pb-24">
                         <div className="flex items-center gap-3 mb-6 flex-wrap">
                            <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
                               {currentQ.topic || 'General'}
@@ -808,6 +916,25 @@ const StudentPortal: React.FC<StudentPortalProps> = ({ onExit, user, uid, isPrem
                             )}
                         </div>
                      </div>
+                  </div>
+
+                  {/* Review Navigation Footer */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-between items-center md:pl-[296px] z-10 shadow-sm">
+                    <button
+                      onClick={() => { if (currentFilterPos > 0) setCurrentQuestionIndex(filteredIndices[currentFilterPos - 1]); }}
+                      disabled={currentFilterPos <= 0}
+                      className="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 disabled:opacity-40 flex items-center gap-2 text-sm transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Previous
+                    </button>
+                    <span className="text-xs text-gray-400 tabular-nums">{currentFilterPos + 1} / {filteredIndices.length}</span>
+                    <button
+                      onClick={() => { if (currentFilterPos < filteredIndices.length - 1) setCurrentQuestionIndex(filteredIndices[currentFilterPos + 1]); }}
+                      disabled={currentFilterPos >= filteredIndices.length - 1}
+                      className="px-7 py-3 rounded-xl bg-gray-900 text-white font-semibold hover:bg-gray-800 disabled:opacity-40 flex items-center gap-2 text-sm transition-colors"
+                    >
+                      Next <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
                </div>
             </div>
